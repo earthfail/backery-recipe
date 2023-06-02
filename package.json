@@ -1,0 +1,10 @@
+{
+  "name": "backery-recipe",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.3",
+    "shadow-cljs": "2.20.20",
+    "tailwindcss": "^3.2.4"
+  }
+}

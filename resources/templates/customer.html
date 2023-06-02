@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>توصيل</title>
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/global.css">
+</head>
+<body class="antialiased">
+    <!-- CALL TO ACTION -->
+        <div
+            class="min-h-screen  max-w-lg mx-auto flex flex-col justify-center px-4 bg-gray-50 md:my-8 md:rounded-xl md:shadow-xl">
+            <!-- Heading -->
+            <div class="inline-flex flex-row justify-center justify-items-center gap-4 mb-6 mt-2 text-5xl font-amiri font-bold text-center ">
+                <p>مرحبا</p> 
+                <p>{{customer}}</p>
+            </div>
+            <div class="px-6 text-gray-600 mb-6">
+                تريد {{merchant}} ان تحدد وقت لتوصيل طلبيتك. الرجاء اختيار الوقت المناسب
+            </div>
+            <form class="mb-0 space-y-6" action="" method="POST" />
+            <div>
+                <label for="time"
+                    class="block font-NotoNaskhArabic text-base font-medium text-gray-700">اوقات</label>
+                <div class="mt-1">
+                    <div  class="flex flex-wrap gap-4 text-2xl">
+                        {% for item in items %}
+                        <div class="flex flex-row items-center gap-2 px-2 rounded-md bg-veryDarkBlue text-white">
+                            <input type="checkbox" name="time"  value="{{item}}" id="time-{{item}}"/>
+                            <label for="time-{{item}}">
+                                <time datetime="{{item}}">{{item}}</time>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label for="notes"
+                    class="block font-NotoNaskhArabic text-base font-medium text-gray-700">ملاحظات</label>
+                <div class="mt-1">
+                    <input type="text" name="notes" id="notes">
+                </div>
+            </div>
+            <div>
+                <button type="submit"
+                    class="w-full flex justify-center mt-4 py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-NotoNaskhArabic font-black text-white bg-veryDarkBlue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-veryDarkBlue">
+                    إرسال
+                </button>
+            </div>
+            </form>
+        </div>
+    
+</body>
+</html>

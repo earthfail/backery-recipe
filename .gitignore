@@ -1,0 +1,6 @@
+.lsp
+.shadow-cljs
+target
+node_modules
+
+**~
