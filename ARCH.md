@@ -1,7 +1,5 @@
-# todo: change for new idea about recipe sharing with graphical website for instructions
-
 # DESCRIPTION
-Web application to monitor and confirm delivery time between drivers and clients.
+share interactive recipe with timers.
 
 # INFRASTRUCTURE
 ## BACKEND
