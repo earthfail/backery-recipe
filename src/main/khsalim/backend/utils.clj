@@ -10,9 +10,11 @@
 (def jwt-secret "f9d63a08-cb4f-4796-8869-8487bd29c29b")
 ;; {:secret jwt-secret :on-error println}
 (def buddy-backend (jws {:secret jwt-secret}))
+;; check authorization header in http request for expression like "Token [token]"
 (defn wrap-jwt-authentication
   [handler]
   (wrap-authentication handler buddy-backend))
+;; check :identity key in request
 (defn auth-middleware
   [handler]
   (fn new-handler [request]
