@@ -17,13 +17,17 @@
 ;; check :identity key in request
 (defn auth-middleware
   [handler]
-  (fn new-handler [request]
+  (fn auth-handler [request]
     (if (authenticated? request)
       (handler request)
       {:status 401 :headers {} :body {:error "Unauthorized"}})))
 (defn create-token [payload]
   (jwt/sign payload @#'jwt-secret))
-
+(defn cookie-header-middleware [handler cookie-name]
+  (fn cookie-auth-handler [request]
+    (handler
+     (assoc-in request [:headers "authorization"]
+               (str "Token " (get-in request [:cookies cookie-name :value]))))))
 (comment
   jwt-secret
   buddy-backend
