@@ -155,7 +155,7 @@
    :legacy-return-value? false})
 (defn start-dev []
   (reset! server-dev
-          (jetty/run-jetty #'app {:port 3000, :join? false}))
+          (jetty/run-jetty #'app {:port 3000, :join? false :host "0.0.0.0"}))
   ;; to stop run (.stop server)
   (println "jetty server running in port 3000"))
 (defn start []

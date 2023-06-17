@@ -28,3 +28,37 @@
 [type="checkbox"]:focus{
     box-shadow: none;
 }
+
+.brown{
+    --text: #0b1c28;
+    --background: #ebf3fa;
+    --primary-button: #643a1b;
+    --secondary-button: #f7fafd;
+    --accent: #140c05;
+}
+
+.yellow{
+    --text: #090802;
+    --background: #f9f6e1;
+    --primary-button: #efe4a9;
+    --secondary-button: #f4ecc3;
+    --accent: #f3ebbf;
+}
+.green{
+    --text: #020401;
+    --background: #f9fdf7;
+    --primary-button: #7ecc5c;
+    --secondary-button: #ffffff;
+    --accent: #8dd270;
+}
+
+.red-brown{
+    --text: #260214;
+    --background: #fffafc;
+    --primary-button: #f23636;
+    --secondary-button: #fdf2e7;
+    --accent: #b6610c;
+    --grass: #16ac16;
+    --dirt: #E3AE7A;
+    --summer-cloud: #FAFEFF;
+}
