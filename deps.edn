@@ -1,4 +1,4 @@
-{:paths ["src/main" "src/test" "resources"]
+{:paths ["src/main" "src/test" "resources" "public"]
  :deps
  {org.clojure/clojure {:mvn/version "1.11.0"}
   ;; database connection
@@ -10,7 +10,7 @@
   ;; https://github.com/http-kit/http-kit
   http-kit/http-kit {:mvn/version "2.6.0"}
   ;; https://github.com/ring-clojure/ring
-;;   javax.servlet/servlet-api {:mvn/version "2.5"}
+  ;; javax.servlet/servlet-api {:mvn/version "2.5"}
   ring/ring {:mvn/version "1.9.6"}
   ring/ring-core {:mvn/version "1.9.6"}
   ring/ring-defaults {:mvn/version "0.3.4"}
@@ -47,7 +47,9 @@
                        com.h2database/h2 {:mvn/version "1.4.199"}}
           :main-opts  ["-m" "rebel-readline.main"]}
   :cljs {:extra-deps {thheller/shadow-cljs {:mvn/version "2.20.20"}
-                      lilactown/helix {:mvn/version "0.1.9"}
-                      funcool/promesa {:mvn/version "10.0.594"}}}
+                      lilactown/helix {:mvn/version "0.1.10"}
+                      ;; reagent/reagent {:mvn/version "1.2.0"}
+                      funcool/promesa {:mvn/version "10.0.594"}}
+         :extra-paths ["src/main"]}
   }
 }

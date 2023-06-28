@@ -62,3 +62,10 @@
     --dirt: #E3AE7A;
     --summer-cloud: #FAFEFF;
 }
+.green-black{
+    --text: #260214;
+    --background: #fffafc;
+    --primary-button: #b9d7b2;
+    --secondary-button: #fdf2e7;
+    --accent: #6fb385;
+}

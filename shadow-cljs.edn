@@ -1,16 +1,60 @@
 ;; shadow-cljs configuration
-{:deps {:aliases [:cljs]}
+{
+ ;; :source-paths ["src/main" "src/test"]
+ ;; :dependencies []
+ :deps {:aliases [:cljs]}
  :builds {:app {:target :browser
                 :output-dir "resources/public/assets/js"
-                :modules {:main {:init-fn app.core/init}}}}
- :dev-http {5003 "resources/public"}}
+                :modules {:main {:init-fn app.core/init}}}
+          :register {:target :browser
+                     :output-dir "public/js"
+                     :asset-path "/js"
+                     :devtools {:watch-dir "public"
+                                :before-load khsalim.frontend.register/stop
+                                :after-load khsalim.frontend.register/start
+                                :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}
+                     :modules {:register {:init-fn khsalim.frontend.register/init}}}}
+ :dev-http {5003 "public"}
+ :nrepl {:port 3333}
+ }
+
 #_{:source-paths
  ["src/dev"
   "src/main"
   "src/test"]
 
  :dependencies
- []
+ [[reagent "1.1.1"]
+  [cljs-http "0.1.46"]
+  [binaryage/oops "0.7.2"]
+  [cider/cider-nrepl "0.28.5"]
+  #_[quil "3.1.0"]                      ; redundant
+  [com.github.seancorfield/next.jdbc "1.3.834"]
+  ;; https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
+  [org.xerial/sqlite-jdbc "3.39.3.0"]]
+
+ :nrepl {:port 3333}
+
+ :dev-http {8080
+            {:root "public"
+             :proxy-url "http://localhost:4000"}} ; start a development server
 
  :builds
- {}}
+ {:frontend
+  {:target :browser
+   :output-dir "public/js"
+   :asset-path "/js"
+   :modules {:main {
+                    ;; :entries [surrlim.frontend.app]
+                    :init-fn surrlim.frontend.app/init
+                    }}}}}
+#_{:source-paths
+   ["src/dev"
+    "src/main"
+    "src/test"]
+
+   :dependencies
+   []
+
+   :builds
+   {}}
