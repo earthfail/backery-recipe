@@ -18,12 +18,13 @@
     [multiple],
     textarea,
     select {
-      @apply w-full border-gray-300 rounded-lg shadow-sm focus:border-veryDarkBlue focus:ring-veryDarkBlue;
+	@apply w-full border-gray-300 rounded-lg shadow-sm focus:border-accent focus:ring-accent;
     }
     [type="checkbox"]{
-      @apply text-veryDarkBlue;
+	@apply text-oil;
     }
 }
+
 
 [type="checkbox"]:focus{
     box-shadow: none;

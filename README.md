@@ -6,6 +6,20 @@
 
 # SOFTWARE
 
+## clojurescript
+the build tool I choose is shadow-cljs. Installed using the command `npm install --save-dev shadow-cljs` but could get the same result with `npm add shadow-cljs -D`.
+for development run `npx shadow-cljs watch <BUILD-ID>` where BUILD-ID is define in `shadow-cljs.edn`. As an example `npx shadow-cljs watch register`
+
+# typescript
+STATUS: not working
+initialized with the command `npx tsc --init`.
+
+# shadcn/ui
+
+shadcn is componentless library for react. it requires typescript.
+- initilized with `npm shadcn-ui@latest init`
+- add component with `npx shadcn-ui@latest add`
+
 # LESSONS
 
 # Copyright 2023 Salim Khatib
