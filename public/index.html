@@ -11,28 +11,67 @@
      .button{
 	 @apply w-full border-gray-300 rounded-lg shadow-sm focus:border-accent focus:ring-accent;
      }
+     .footer{
+	@apply sticky bottom-0;
+     }
+	 /* class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 pl-5 border-2 border-black" */
     </style>
 </head>
-<body class="sm:w-full md:w-1/2 md:mx-auto min-h-screen relative">
-    <div class="flex flex-row justify-between md:px-4 py-2 bg-secondery">
+<body class="flex flex-col sm:w-full md:w-1/2 md:mx-auto min-h-screen relative">
+    <header class="flex flex-row justify-between px-4 py-2 bg-secondery">
 	<span class="font-amiri text-lg">أطباق سُهيل</span>
-	<button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 pl-5" type="button">حسابي</button>
-    </div>
-    <section class="bg-gradient-to-b from-secondery to-background h-1/4 md:px-4 py-8">
+	<button class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-secondery text-black shadow hover:bg-primary/90 hover:text-white focus:bg-grass focus:text-white h-9 px-4 py-2 border-2 border-black" type="button">حسابي</button>
+    </header>
+    <section class="bg-gradient-to-b from-secondery from-30% to-background h-1/4 px-4 pt-8 pb-4">
 	<picture>
 	    <img alt="" src="/resources/static/chef-hat.svg"/>
 	</picture>
 	<aside>
-	    <h1>وصفات سهلة</h1>
-	    <p>أفضل موقع لمشاركة الوصفات</p>
-	    <p>شارك عملائك في لحظات</p>
+	    <h1 class="font-amiri text-2xl">وصفات سهلة</h1>
+	    <p class="leading-loose">أفضل موقع لمشاركة الوصفات</p>
+	    <p class="leading-loose">شارك عملائك في لحظات</p>
 	</aside>
-	<button class="bg-primary text-white">
-	    انشء حساب
+	<button class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-secondery shadow hover:bg-primary/90 focus:bg-grass focus-visible:text-white focus-visible:ring-accent2 hover:ring-1 h-11  px-8 py-2">
+	    ابدا الان
 	</button>
     </section>
-    <div class="bg-yellow-200"> Hi I'm hellow</div>
-    <footer class="flex flex-row justify-center absolute bottom-0 w-full py-4 bg-accent2 text-white font-amiri font-semibold">
+    <article class="grow">
+	<section class="h-screen bg-black">
+	    <div class="bg-oil px-4 py-4">
+		<h3 class="text-3xl">انشء حساب</h3>
+		<p class="w-[45ch]">يمكن بدأ مجانا وبدون ايميل</p>
+	    </div>
+	    <picture class="mb-2 aspect-phone w-[300px]">
+		<div class="w-full h-full my-1 bg-gray-200" alt="" src=""/>
+	    </picture>
+	</section>
+	<section class="h-screen">
+	    <div class="bg-oil px-4 py-4">
+		<h3 class="text-3xl">سجل وصفه</h3>
+		<p class="w-[45ch]">
+		    سجل خطوات التحضير. يمكن اضافة صورة وفيديو ومؤقت.
+		    سوف يقوم نطامنا بقراءت الخطوات للمستخدم
+		</p>
+	    </div>
+	    <picture>
+		<div class="w-[250px] h-[250px] my-1 bg-gray-200" alt="" src=""/>
+	    </picture>
+	</section>
+	<section class="h-screen">
+	    <div class="bg-oil px-4 py-4">
+		<h3 class="text-3xl">شارك معجبيك</h3>
+		<p class="w-[45ch]">
+		    يمكن مشاركت وصفتين بالحساب المجاني والاف الوصفات بالحساب التجاري
+		</p>
+	    </div>
+	    <picture>
+		<div class="w-[250px] h-[250px] my-1 bg-gray-200" alt="" src=""/>
+	    </picture>
+	</section>
+    </article>
+    <div class="bg-yellow-200"> Salam Sailor</div>
+    </article>
+    <footer class="flex flex-row justify-center w-full py-4 bg-accent2 text-white font-amiri font-semibold leading-3">
 	سليم خطيب
     </footer>
     

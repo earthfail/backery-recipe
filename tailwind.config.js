@@ -13,7 +13,10 @@ module.exports = {
         amiri: "'Amiri', serif",
         NotoNaskhArabic: "'Noto Naskh Arabic', serif"
       },
-      colors: {
+	aspectRatio:{
+	    'phone': '6/13',
+	},
+    colors: {
           veryDarkBlue: 'hsl(233, 12%, 13%)',
           veryLightGray: '#F2F2F2',
 	  primary: '#F23636',
@@ -22,6 +25,7 @@ module.exports = {
 	  text: '#260214',
 	  accent: '#B6610C',
 	  accent2: '#E3AE7A',
+	  grass: '#16AC16',
 	  oil: '#EAE9E1',
 	  pastel: '#637E93',
 	  pastel2: '#787B97'
