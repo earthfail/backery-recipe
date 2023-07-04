@@ -39,6 +39,10 @@
   ;; alternative
   ;; https://github.com/metosin/jsonista
   ;;metosin/jsonista {:mvn/version "0.3.7"}
+  ;; clojure dart
+  ;; https://github.com/Tensegritics/ClojureDart/tree/main
+  tensegritics/clojuredart {:git/url "https://github.com/tensegritics/ClojureDart.git"
+                            :sha "ae1b485e84ccc35b122f776dfc7cc62198274701"}
   }
  :aliases
  {:build {:deps {io.github.clojure/tools.build {:mvn/version "0.9.3"}}
@@ -52,5 +56,7 @@
                       funcool/promesa {:mvn/version "10.0.594"}}
          ;; :extra-paths ["src/main"]
          }
-  }
+  :cljd {:main-opts ["-m" "cljd.build"]}}
+ :cljd/opts {:kind :flutter
+             :main khsalim.app.main}
 }

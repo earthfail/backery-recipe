@@ -20,6 +20,14 @@ shadcn is componentless library for react. it requires typescript.
 - initilized with `npm shadcn-ui@latest init`
 - add component with `npx shadcn-ui@latest add`
 
+# clojuredart
+used to build android and ios app with flutter, see [clojuredart](https://github.com/Tensegritics/ClojureDart/tree/main)
+inialize with `clj -M:cljd init`.
+## start emulator
+Run `flutter emulators --launch Pixel_XL_API_34` from root directory of the project. To list emulators run `flutter emulators` 
+## start clojuredart watcher
+In root directory of project run `cl -M:cljd flutter`
+
 # LESSONS
 
 # Copyright 2023 Salim Khatib

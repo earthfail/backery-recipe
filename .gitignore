@@ -9,3 +9,11 @@ node_modules
 /.cpcache/
 .clj-kondo
 /public/js/
+
+# ClojureDart
+.cpcache/
+.clojuredart/
+lib/cljd-out/
+test/cljd-out/
+/.dart_tool/
+/build/
