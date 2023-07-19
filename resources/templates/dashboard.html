@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+    <head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{name}}-dashboard</title>
+	<link rel="icon" href="data:,">
+	<link rel="stylesheet" href="/assets/dashboard.css" type="text/css" media="screen" />
+	<style>
+	 .button{
+	     @apply w-full border-gray-300 rounded-lg shadow-sm focus:border-accent focus:ring-accent;
+	 }
+	 .footer{
+	     @apply sticky bottom-0;
+	 }
+	 /* class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 pl-5 border-2 border-black" */
+	</style>
+    </head>
+    <body class="flex flex-col sm:w-full md:w-1/2 md:mx-auto min-h-screen relative">
+	<header class="flex flex-row justify-between px-4 py-2 bg-secondery">
+	    <span class="font-amiri text-lg">أطباق سُهيل</span>
+	    <div class="block mx-auto rounded-full sm:mx-0 sm:shrink-0">
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+	    </div>
+	</header>
+	<div class="w-full">
+	    مرحبا <span>{{name}}</span> سعدنا بوجودك معنا
+	</div>
+	<div class="grow space-y-2 my-2 shadow-md rounded-xl px-2 py-2">
+	    <div class="flex items-center justify-between">
+		<div class="flex  items-center space-x-2">
+		    <input class="flex rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 h-8 w-[150px] lg:w-[250px]"
+			   name="recipe" type="text" value=""/>
+		</div>
+		<button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background border border-input hover:bg-accent2 hover:text-white h-10 w-10">
+		    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/>
+		    </svg>
+		</button>
+	    </div>
+	    <div class="rounded-md border">
+		<div class="w-full overflow-auto">
+		    <table class="w-full caption-bottom text-sm">
+			<thead class="[&_tr]:border-b">
+			    <tr class="hover:bg-slate-200">
+				<th class="w-5 h-8 px-2 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+				    <button type="button" role="checkbox" aria-checked="true" data-state="checked" value="on"
+					    class="peer h-5 w-5 shrink-0 rounded-sm border border-accent2 shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-accent2 data-[state=checked]:text-white translate-y-[2px]" aria-label="Select all">
+					<span data-state="checked" class="flex items-center justify-center text-current" style="pointer-events: none;">
+					    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4">
+						<path d="M11.4669 3.72684C11.7558 3.91574 11.8369 4.30308 11.648 4.59198L7.39799 11.092C7.29783 11.2452 7.13556 11.3467 6.95402 11.3699C6.77247 11.3931 6.58989 11.3355 6.45446 11.2124L3.70446 8.71241C3.44905 8.48022 3.43023 8.08494 3.66242 7.82953C3.89461 7.57412 4.28989 7.55529 4.5453 7.78749L6.75292 9.79441L10.6018 3.90792C10.7907 3.61902 11.178 3.53795 11.4669 3.72684Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path>
+					    </svg>
+					</span>
+				    </button>
+				</th>
+				<th class="h-8 px-2 text-right align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+				    <div class="">وصفة</div>
+				</th>
+			    </tr>
+			</thead>
+			<tbody class="[&_tr:last-child]:border-0">
+			    {% for recipe in recipes %}
+			    <tr class="hover:bg-slate-200">
+				<td class="w-5 h-10 px-2 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+				    <button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="off"
+					    class="peer h-5 w-5 shrink-0 rounded-sm border border-accent2 shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-accent2 data-[state=checked]:text-white translate-y-[2px]"
+					    aria-label="Select all">
+					<!-- <span data-state="checked" class="flex items-center justify-center text-current" style="pointer-events: none;"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"><path d="M11.4669 3.72684C11.7558 3.91574 11.8369 4.30308 11.648 4.59198L7.39799 11.092C7.29783 11.2452 7.13556 11.3467 6.95402 11.3699C6.77247 11.3931 6.58989 11.3355 6.45446 11.2124L3.70446 8.71241C3.44905 8.48022 3.43023 8.08494 3.66242 7.82953C3.89461 7.57412 4.28989 7.55529 4.5453 7.78749L6.75292 9.79441L10.6018 3.90792C10.7907 3.61902 11.178 3.53795 11.4669 3.72684Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg></span> -->
+				    </button>
+				</td>
+				<td class="h-10 px-2 text-right align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pl-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+				    <div class="">{{recipe.name}}</div>
+				</td>
+				<td class="h-10 px-2 text-right align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pl-0 [&amp;>[role=checkbox]]:translate-y-[2px]">
+				    <a href="{{recipe.link|default:#}}">{{recipe.id}}</a>
+				</td>
+			    </tr>
+			    {% endfor %}
+			    
+			</tbody>
+		    </table>
+		</div>
+	    </div>
+	</div>
+	
+	<div class="bg-yellow-200"> Salam Sailor</div>
+	</article>
+	<footer class="flex flex-row justify-center w-full py-4 bg-accent2 text-white font-amiri font-semibold leading-3">
+	    سليم خطيب
+	</footer>
+	<div id="data" class="hidden">
+	    {{recipes|json}}
+	</div>
+	<script>
+	 let data = JSON.parse(document.getElementById("data").innerHTML);
+	 
+	 console.log(data);
+	</script>
+	<!-- <div id="app"></div>
+	     <script src="/js/register.js"></script>
+	-->
+    </body>
+</html>

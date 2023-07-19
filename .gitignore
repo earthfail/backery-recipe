@@ -17,3 +17,4 @@ lib/cljd-out/
 test/cljd-out/
 /.dart_tool/
 /build/
+dev/data

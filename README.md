@@ -20,6 +20,8 @@ shadcn is componentless library for react. it requires typescript.
 - initilized with `npm shadcn-ui@latest init`
 - add component with `npx shadcn-ui@latest add`
 
+# Browser-sync
+for live server reloading with basic html and css. Install with `npm install -g browser-sync`. Run with `browser-sync start --server --files 'public/*'` if you want a static server. In case you are using the backend run `browser-sync start --proxy "localhost:3000" --files "public/**/*" "resources/**/*" "src/**/*"`
 # clojuredart
 used to build android and ios app with flutter, see [clojuredart](https://github.com/Tensegritics/ClojureDart/tree/main)
 inialize with `clj -M:cljd init`.
