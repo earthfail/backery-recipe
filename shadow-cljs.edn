@@ -13,15 +13,7 @@
                                 :before-load khsalim.frontend.register/stop
                                 :after-load khsalim.frontend.register/start
                                 :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}
-                     :modules {:register {:init-fn khsalim.frontend.register/init}}}
-          :recipe {:target :browser
-                     :output-dir "public/js"
-                     :asset-path "/js"
-                     :devtools {:watch-dir "public"
-                                :before-load khsalim.frontend.recipe/stop
-                                :after-load khsalim.frontend.recipe/start
-                                :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}
-                     :modules {:recipe {:init-fn khsalim.frontend.recipe/init}}}}
+                     :modules {:register {:init-fn khsalim.frontend.register/init}}}}
  :dev-http {5003 "public"}
  :nrepl {:port 3333}
  }

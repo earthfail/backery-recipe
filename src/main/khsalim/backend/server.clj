@@ -21,8 +21,6 @@
                                             #_format-request-middleware
                                             #_format-response-middleware]]
    [reitit.ring.middleware.parameters :refer [parameters-middleware]]
-   [clojure.java.io :as io]
-   [selmer.parser :as selmer]
    ;; [reitit.ring.middleware.multipart :refer [multipart-middleware]]
    ))
 
@@ -109,24 +107,14 @@
    ["/index.html" #_(java.io.File. "public/index.html")
     {:name ::landing
      :get (fn [_] (rur/file-response "public/index.html"))}]
-   ["/assets/*" (ring/create-file-handler)]
-   ["/js/*" (ring/create-file-handler {:root "public/js"})]])
+   ["/assets/*" (ring/create-file-handler)]])
 (def api-routes
   ["/api"
    ["/v1"
-    ["/recipe/:order-id" {:name ::order
-                          :middleware [wrap-jwt-authentication auth-middleware]
-                          :get customer-form
-                          :post confirm-choice}]]])
-(defn dashboard [_]
-  (rur/response (selmer/render-file (io/resource "templates/dashboard.html")
-                                    {:name "سليم محمود خطيب"
-                                     :recipes [{:id "1" :link "abc/meme.htdd" :name "تبولة"}
-                                               {:id "3" :name "console.log('yes')"}]})))
-(defn recipe [_]
-  (rur/response (selmer/render-file (io/resource "templates/recipe.html")
-                                    {:recipes [{:img "abc" :id 1 :description "Hi,I'm Dave"}]
-                                     :name "wut"})))
+    ["/recipe/:order-id" :name ::order
+      :middleware [wrap-jwt-authentication auth-middleware]
+      :get customer-form
+     :post confirm-choice]]])
 (def router-gen
   (fn [] (ring/router
           [static-routes
@@ -137,7 +125,8 @@
                                 :middleware [parameters-middleware
                                              format-middleware
                                              exception-middleware]}}]
-           ["/login" {:get echo
+           ["/login" {
+                      :get echo
                       :post {:handler confirm-user
                              :muuntaja m/instance
                              :middleware [parameters-middleware
@@ -147,10 +136,6 @@
                      :middleware [[cookie-header-middleware "user_jwt"] wrap-jwt-authentication auth-middleware]
                      :get echo
                      :post echo}]
-           ["/dashboard" {:name ::dashboard
-                          :get dashboard}]
-           ["/start" {:name ::dashboard
-                          :get recipe}]
            api-routes]
           #_{:data {:muuntaja m/instance
                     :middleware [parameters-middleware
@@ -161,7 +146,6 @@
   (ring/ring-handler
    ;; ring/router the value
    (dev-router router-gen)
-   ;; (router-gen)
    (ring/routes
     #_(ring/redirect-trailing-slash-handler)
     (ring/create-default-handler))))
@@ -191,15 +175,12 @@
 
 (comment
   (start-dev)
-  ;; (start)
-  ;; (stop)
   ;; (restart)
   ;; setup for development
   (do
     (require '[clojure.java.javadoc :as jdoc]
              '[clojure.reflect :as reflect]
              '[clojure.inspector :as insp]
-             '[clojure.java.io :as io]
              '[clojure.pprint :as pp]
              '[clojure.repl :as repl])
     (jdoc/add-remote-javadoc "org.eclipse.jetty.server" "https://www.eclipse.org/jetty/javadoc/jetty-9/")
@@ -212,7 +193,7 @@
   (org.eclipse.jetty.server.Server/getVersion) ;"9.4.48.v20220622"
   tmp ; C-c M-i cider inspect
   #_{ "n" "emailasdfas", "pss" "passwdcvvccvvc", "button" "send" }
-  (parser/known-variables (slurp (io/resource "templates/dashboard.html")))
+  
   ;; C-c C-d C-d cider-doc
   (-> app
       ring/get-router

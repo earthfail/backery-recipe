@@ -9,14 +9,3 @@ node_modules
 /.cpcache/
 .clj-kondo
 /public/js/
-
-
-.clojuredart
-.dart_tool
-.idea
-android
-ios
-lib
-linux
-macos
-build
