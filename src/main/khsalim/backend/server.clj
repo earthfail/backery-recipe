@@ -22,12 +22,14 @@
                                             #_format-response-middleware]]
    [reitit.ring.middleware.parameters :refer [parameters-middleware]]
    ;; [reitit.ring.middleware.multipart :refer [multipart-middleware]]
+   [selmer.parser :as selmer]
+   [clojure.java.io :as io]
    ))
 
 
 
 (defonce server (atom nil))
-(defonce server-dev (atom nil))
+;; (defonce server-dev (atom nil))
 (defn customer-form [{{:keys [order-id]} :path-params}]
   (if-let [info (get @db-dev order-id)]
     (rur/response (render-form info))
@@ -79,6 +81,14 @@
             (println "I'm here")
             {:status 400 :body message})))
       {:status 400 :body "email or password messing. must be in a form urlencoded to login"})))
+(defn dashboard [_]
+  (rur/response (selmer/render-file (io/resource "templates/dashboard.html")
+                                    {:name "salim"})))
+(defn recipe [_]
+  (rur/response (selmer/render-file (io/resource "templates/recipe.html")
+                                    {:name "salim"
+                                     :recipes [{:id 1 :img "abc.xyz" :description "wow nice cu"}]})))
+
 (defn echo [req]
   (println "doing echo!!")
   (println (java.util.Date.))
@@ -111,10 +121,10 @@
 (def api-routes
   ["/api"
    ["/v1"
-    ["/recipe/:order-id" :name ::order
-      :middleware [wrap-jwt-authentication auth-middleware]
-      :get customer-form
-     :post confirm-choice]]])
+    ["/recipe/:order-id" {:name ::order
+                          :middleware [wrap-jwt-authentication auth-middleware]
+                          :get customer-form
+                          :post confirm-choice}]]])
 (def router-gen
   (fn [] (ring/router
           [static-routes
@@ -125,8 +135,7 @@
                                 :middleware [parameters-middleware
                                              format-middleware
                                              exception-middleware]}}]
-           ["/login" {
-                      :get echo
+           ["/login" {:get echo
                       :post {:handler confirm-user
                              :muuntaja m/instance
                              :middleware [parameters-middleware
@@ -136,6 +145,9 @@
                      :middleware [[cookie-header-middleware "user_jwt"] wrap-jwt-authentication auth-middleware]
                      :get echo
                      :post echo}]
+           ["/dashboard" dashboard]
+           ["/start" {:name ::recipe
+                      :get recipe}]
            api-routes]
           #_{:data {:muuntaja m/instance
                     :middleware [parameters-middleware
@@ -146,6 +158,7 @@
   (ring/ring-handler
    ;; ring/router the value
    (dev-router router-gen)
+   ;; (router-gen)
    (ring/routes
     #_(ring/redirect-trailing-slash-handler)
     (ring/create-default-handler))))
@@ -193,7 +206,7 @@
   (org.eclipse.jetty.server.Server/getVersion) ;"9.4.48.v20220622"
   tmp ; C-c M-i cider inspect
   #_{ "n" "emailasdfas", "pss" "passwdcvvccvvc", "button" "send" }
-  
+  @server
   ;; C-c C-d C-d cider-doc
   (-> app
       ring/get-router

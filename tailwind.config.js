@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: ["./public/**/*.{html,js,ts}","./src/main/khsalim/frontend/**/*"],
+    content: ["./public/**/*.{html,js,ts}","./resources/statics/*","./resources/templates/**/*","./src/main/khsalim/frontend/**/*"],
     theme: {
 	screens: {
 	    sm: '480px',
