@@ -26,7 +26,7 @@ inialize with `clj -M:cljd init`.
 ## start emulator
 Run `flutter emulators --launch Pixel_XL_API_34` from root directory of the project. To list emulators run `flutter emulators` 
 ## start clojuredart watcher
-In root directory of project run `cl -M:cljd flutter`
+In root directory of project run `clj -M:cljd flutter`
 
 # LESSONS
 
