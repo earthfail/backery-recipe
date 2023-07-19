@@ -1,6 +1,7 @@
 {:paths ["src/main" "src/test" "resources" "public"]
  :deps
- {org.clojure/clojure {:mvn/version "1.11.0"}
+ {org.clojure/clojure {:mvn/version "1.11.1"}
+  org.clojure/clojurescript {:mvn/version "1.11.60"}
   ;; database connection
   com.github.seancorfield/next.jdbc {:mvn/version "1.3.847"}
   ;; connection pool
@@ -39,6 +40,16 @@
   ;; alternative
   ;; https://github.com/metosin/jsonista
   ;;metosin/jsonista {:mvn/version "0.3.7"}
+  ;; clojure dart
+  ;; https://github.com/Tensegritics/ClojureDart/tree/main
+  tensegritics/clojuredart {:git/url "https://github.com/tensegritics/ClojureDart.git"
+                            :sha "ae1b485e84ccc35b122f776dfc7cc62198274701"}
+  ;; asset minifier
+  ;; https://github.com/yogthos/asset-minifier
+  asset-minifier/asset-minifier {:mvn/version "0.2.7"}
+  ;; for dynamic runtime dependencies
+  ;; https://github.com/clj-commons/pomegranate
+  clj-commons/pomegranate {:mvn/version "1.2.23"}
   }
  :aliases
  {:build {:deps {io.github.clojure/tools.build {:mvn/version "0.9.3"}}
@@ -46,7 +57,7 @@
   :rebel {:extra-deps {com.bhauman/rebel-readline {:mvn/version "0.1.4"}
                        com.h2database/h2 {:mvn/version "1.4.199"}}
           :main-opts  ["-m" "rebel-readline.main"]}
-  :cljs {:extra-deps {thheller/shadow-cljs {:mvn/version "2.20.20"}
+  :cljs {:extra-deps {thheller/shadow-cljs {:mvn/version "2.24.1"}
                       lilactown/helix {:mvn/version "0.1.10"}
                       ;; reagent/reagent {:mvn/version "1.2.0"}
                       funcool/promesa {:mvn/version "10.0.594"}}

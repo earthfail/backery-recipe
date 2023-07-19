@@ -1,0 +1,19 @@
+(ns khsalim.app.main
+  (:require ["package:flutter/material.dart" :as m]
+            [cljd.flutter :as f]))
+
+(defn main []
+  (f/run
+    (m/MaterialApp
+      .title "Where am I"
+      .theme (m/ThemeData .primarySwatch m.Colors/pink))
+    .home
+    (m/Scaffold
+      .appBar (m/AppBar
+                .title (m/Text "السلام عليكم")))
+    .body
+    m/Center
+    (m/Text "اللهم امنهم من خوف أمين"
+       .style (m/TextStyle
+                .color m.Colors/blue
+                .fontSize 32.0))))
