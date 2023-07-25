@@ -87,7 +87,8 @@
 (defn recipe [_]
   (rur/response (selmer/render-file (io/resource "templates/recipe.html")
                                     {:name "salim"
-                                     :recipes [{:id 1 :img "abc.xyz" :description "wow nice cu"}]})))
+                                     :recipes [{:id 1 :img "test1.jpg" :description "نضع زين الزيتون في المقلاة"}
+                                               {:id 2 :img "test2.jpg" :description "نقطع الخضراوات على شكل مربعات"}]})))
 
 (defn echo [req]
   (println "doing echo!!")
@@ -164,7 +165,7 @@
     (ring/create-default-handler))))
 
 (def service-map
-  {:port 3001
+  {:port 3010
    :legacy-return-value? false})
 (defn start-dev []
   (reset! server-dev
@@ -190,6 +191,7 @@
   (start-dev)
   ;; (restart)
   ;; setup for development
+  
   (do
     (require '[clojure.java.javadoc :as jdoc]
              '[clojure.reflect :as reflect]
