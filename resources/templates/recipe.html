@@ -24,10 +24,10 @@
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chef-hat"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" x2="18" y1="17" y2="17"/></svg>
 	    </div>
 	</header>
-	<div id="app" class="grow flex">
-	    <div class="gallery w-full grow flex">
-		<div class="bg-cover mx-auto max-w-prose grow pt-72" style="background-image:url('/assets/img/{{recipes.0.img}}')">
-		    <div class="bg-gradient-to-b from-transparent via-30% via-black/40 to-black h-full">
+	<div id="app" class=" grow flex">
+	    <div class="gallery w-full  basis-full">
+		<div class="bg-cover bg-center mx-auto max-w-prose pt-[50%] h-full" style="background-image:url('/assets/img/{{recipes.0.img}}')">
+		    <div class="bg-gradient-to-b from-transparent via-10% via-black/60 to-black h-full px-4 py-8">
 			<span class="text-white">
 			    {{recipes.0.description}}    
 			</span>
@@ -35,8 +35,19 @@
 		</div>
 	    </div>
 	</div>
+	<!-- <div id="app" class="grow flex">
+	     <div class="gallery w-full grow flex">
+	     <div class="bg-cover mx-auto max-w-prose grow pt-72" style="background-image:url('/assets/img/{{recipes.0.img}}')">
+	     <div class="bg-gradient-to-b from-transparent via-30% via-black/40 to-black h-full">
+	     <span class="text-white">
+	     {{recipes.0.description}}    
+	     </span>
+	     </div>
+	     </div>
+	     </div>
+	     </div> -->
 	<div class="bg-yellow-200"> Salam Sailor</div>
-	<footer class="flex flex-row justify-center w-full py-4 bg-accent2 text-white font-amiri font-semibold leading-3">
+	<footer class="flex flex-row justify-center w-full mt-auto py-4 bg-accent2 text-white font-amiri font-semibold leading-3">
 	    سليم خطيب
 	</footer>
 	<div id="data" class="hidden">
