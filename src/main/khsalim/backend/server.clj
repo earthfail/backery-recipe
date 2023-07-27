@@ -87,7 +87,7 @@
 (defn recipe [_]
   (rur/response (selmer/render-file (io/resource "templates/recipe.html")
                                     {:name "salim"
-                                     :recipes [{:id 1 :img "test1.jpg" :description "نضع زين الزيتون في المقلاة"}
+                                     :recipes [{:id 1 :img "test1.jpg" :description "نضع زيت الزيتون في المقلاة"}
                                                {:id 2 :img "test2.jpg" :description "نقطع الخضراوات على شكل مربعات"}]})))
 
 (defn echo [req]

@@ -20,34 +20,32 @@
 (def size (.-clientWidth (first carouselImages)))
 
 (defn advance-carousel-event! [e]
-  (js/console.log "advancing" @counter)
   (do
     (if (< @counter (dec (count carouselImages)))
       (swap! counter inc))
     (set! (.. carouselSlide -style -transform) (str "translateX(" (* size @counter) "px)"))))
 (defn withdraw-carousel-event! [e]
-  (js/console.log "withdraw" @counter)
   (do
     (if (> @counter 0)
       (swap! counter dec))
-    (set! (.. carouselSlide -style -transform) (str "translateX(" (- (* size @counter)) "px)"))))
+    (set! (.. carouselSlide -style -transform) (str "translateX(" (* size @counter) "px)"))))
 
 (defn ^:dev/after-load start []
-  (js/console.log "start")
-  (js/console.log "data..." (read-data!))
-  (js/console.log "adding events...")
+  ;; (js/console.log "start")
+  ;; (js/console.log "data..." (read-data!))
+  ;; (js/console.log "adding events...")
   (.addEventListener nextBtn "click" advance-carousel-event!)
   (.addEventListener prevBtn "click" withdraw-carousel-event!)
   (set! (.. carouselSlide -style -transition) "transform 0.4s ease-in-out")
   )
 (defn ^:dev/before-load stop []
-  (js/console.log "stop you")
-  (js/console.log "removing events...")
+  ;; (js/console.log "stop you")
+  ;; (js/console.log "removing events...")
   (.removeEventListener nextBtn "click" advance-carousel-event!)
   (.removeEventListener prevBtn "click" withdraw-carousel-event!)
   )
 (defn init []
-  (js/console.log "yeah baby I'm init!")
+  ;; (js/console.log "yeah baby I'm init!")
   #_(update-plot-data! true)
   (start))
 
