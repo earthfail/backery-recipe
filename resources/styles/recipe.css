@@ -70,3 +70,10 @@
     --secondary-button: #fdf2e7;
     --accent: #6fb385;
 }
+
+/* .carousel-container [data-active]{
+   display:none;
+   }
+   .carousel-container [data-active="true"]{
+   display: block;
+} */

@@ -1,27 +1,51 @@
 (ns khsalim.frontend.recipe
-  (:require [helix.core :refer [defnc $]]
-            [helix.hooks :as hooks]
-            [helix.dom :as d]
-            ["react-dom/client" :as rdom]
-            ))
+  ;; (:require [helix.core :refer [defnc $]]
+  ;;           [helix.hooks :as hooks]
+  ;;           [helix.dom :as d]
+  ;;           ["react-dom/client" :as rdom])
+  )
 (defn read-data! []
   (-> js/document
       (.getElementById "data")
-      .-innerHTML
+      .-text
       js/JSON.parse
       (js->clj :keywordize-keys true)))
+(defonce counter (atom 0))
+(def carouselSlide (js/document.querySelector "[data-type=\"carousel-slide\"]"))
+(def carouselImages (into [] (js/document.querySelectorAll "[data-type=\"img\"]")))
 
-(defn root [state]
-  [:div.view #_{:class "container is-fluid columns box"}
-   [months-menu state]
-   [:div.chart [chart state]]])
+(def nextBtn (js/document.getElementById "nextBtn"))
+(def prevBtn (js/document.getElementById "prevBtn"))
+
+(def size (.-clientWidth (first carouselImages)))
+
+(defn advance-carousel-event! [e]
+  (js/console.log "advancing" @counter)
+  (do
+    (if (< @counter (dec (count carouselImages)))
+      (swap! counter inc))
+    (set! (.. carouselSlide -style -transform) (str "translateX(" (* size @counter) "px)"))))
+(defn withdraw-carousel-event! [e]
+  (js/console.log "withdraw" @counter)
+  (do
+    (if (> @counter 0)
+      (swap! counter dec))
+    (set! (.. carouselSlide -style -transform) (str "translateX(" (- (* size @counter)) "px)"))))
 
 (defn ^:dev/after-load start []
   (js/console.log "start")
-  (when-let [el (gdom/getElement "root")]
-    (rdom/render [root plot-data] el)))
+  (js/console.log "data..." (read-data!))
+  (js/console.log "adding events...")
+  (.addEventListener nextBtn "click" advance-carousel-event!)
+  (.addEventListener prevBtn "click" withdraw-carousel-event!)
+  (set! (.. carouselSlide -style -transition) "transform 0.4s ease-in-out")
+  )
 (defn ^:dev/before-load stop []
-  (js/console.log "stop you"))
+  (js/console.log "stop you")
+  (js/console.log "removing events...")
+  (.removeEventListener nextBtn "click" advance-carousel-event!)
+  (.removeEventListener prevBtn "click" withdraw-carousel-event!)
+  )
 (defn init []
   (js/console.log "yeah baby I'm init!")
   #_(update-plot-data! true)
@@ -80,4 +104,3 @@
     (js/console.log "yeah baby I'm init!")
     #_(update-plot-data! true)
     (start)))
-
