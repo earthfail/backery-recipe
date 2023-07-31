@@ -3,14 +3,26 @@
   ;;           [helix.hooks :as hooks]
   ;;           [helix.dom :as d]
   ;;           ["react-dom/client" :as rdom])
+  (:require [clojure.edn :as edn])
   )
+;; NOTE: could benifit from agents and add-watch function `https://clojuredocs.org/clojure.core/add-watch`
+(goog-define VERBOSE true)
+
 (defn read-data! []
   (-> js/document
       (.getElementById "data")
       .-text
       js/JSON.parse
       (js->clj :keywordize-keys true)))
-(defonce counter (atom 0))
+(def current-page (get (read-data!) :page 0))
+
+;; could merge with {current-page 0} or check if key is nil when advancing
+;; I choose the second option
+(defonce pages (atom (if-let [pages (edn/read-string (js/localStorage.getItem "pages"))]
+                       pages
+                       {current-page 0})))
+(defonce counter (atom (get @pages current-page 0)))
+
 (def carouselSlide (js/document.querySelector "[data-type=\"carousel-slide\"]"))
 (def carouselImages (into [] (js/document.querySelectorAll "[data-type=\"img\"]")))
 
@@ -21,35 +33,56 @@
 
 (defn advance-carousel-event! [e]
   (do
-    (if (< @counter (dec (count carouselImages)))
-      (swap! counter inc))
+    (when (< @counter (dec (count carouselImages)))
+      (swap! counter inc)
+      (if (= @counter (dec (count carouselImages)))
+        (swap! pages dissoc current-page)
+        (swap! pages update current-page (fnil inc 0)))
+      (js/localStorage.setItem "pages" (prn-str @pages)))
+    (when VERBOSE
+      (println "counter is " @counter)
+      (println "pages is" @pages))
     (set! (.. carouselSlide -style -transform) (str "translateX(" (* size @counter) "px)"))))
 (defn withdraw-carousel-event! [e]
   (do
-    (if (> @counter 0)
-      (swap! counter dec))
+    (when (> @counter 0)
+      (swap! counter dec)
+      (swap! pages assoc current-page @counter)
+      (js/localStorage.setItem "pages" (prn-str @pages)))
+    (when VERBOSE
+      (println "counter is " @counter)
+      (println "pages is" @pages))
     (set! (.. carouselSlide -style -transform) (str "translateX(" (* size @counter) "px)"))))
 
 (defn ^:dev/after-load start []
-  ;; (js/console.log "start")
-  ;; (js/console.log "data..." (read-data!))
-  ;; (js/console.log "adding events...")
+  (when  VERBOSE
+    (js/console.log "start")
+    (js/console.log "data..." (read-data!))
+    (js/console.log "adding events..."))
+  (when VERBOSE
+      (println "counter is " @counter)
+      (println "pages in localStorage is" (js/localStorage.getItem "pages")))
+
   (.addEventListener nextBtn "click" advance-carousel-event!)
   (.addEventListener prevBtn "click" withdraw-carousel-event!)
   (set! (.. carouselSlide -style -transition) "transform 0.4s ease-in-out")
+  (set! (.. carouselSlide -style -transform) (str "translateX(" (* size @counter) "px)"))
   )
 (defn ^:dev/before-load stop []
-  ;; (js/console.log "stop you")
-  ;; (js/console.log "removing events...")
+  (when VERBOSE
+    (js/console.log "stop you")
+    (js/console.log "removing events..."))
   (.removeEventListener nextBtn "click" advance-carousel-event!)
   (.removeEventListener prevBtn "click" withdraw-carousel-event!)
   )
 (defn init []
-  ;; (js/console.log "yeah baby I'm init!")
+  (when VERBOSE
+    (js/console.log "yeah baby I'm init!"))
   #_(update-plot-data! true)
   (start))
 
 (comment
+
   ;; helix
   ;; define components using the `defnc` macro
 ;; (defnc greeting

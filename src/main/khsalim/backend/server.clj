@@ -4,9 +4,7 @@
    [khsalim.backend.customer :refer [render-form]]
    [khsalim.backend.utils :refer [cookie-header-middleware wrap-jwt-authentication auth-middleware create-token]]
    [khsalim.backend.db :as db :refer [db-dev]]
-   ;; prod server
-   [org.httpkit.server :refer [run-server server-stop!]]
-   ;; dev server
+   ;; [org.httpkit.server :refer [run-server server-stop!]]
    [ring.adapter.jetty :as jetty]
    [reitit.dev.pretty :as pretty]
 
@@ -26,10 +24,10 @@
    [clojure.java.io :as io]
    ))
 
-
+(selmer/set-resource-path! (io/resource "templates"))
 
 (defonce server (atom nil))
-;; (defonce server-dev (atom nil))
+(defonce server-dev (atom nil))
 (defn customer-form [{{:keys [order-id]} :path-params}]
   (if-let [info (get @db-dev order-id)]
     (rur/response (render-form info))
@@ -82,13 +80,16 @@
             {:status 400 :body message})))
       {:status 400 :body "email or password messing. must be in a form urlencoded to login"})))
 (defn dashboard [_]
-  (rur/response (selmer/render-file (io/resource "templates/dashboard.html")
+  (rur/response (selmer/render-file "dashboard.html"
                                     {:name "salim"})))
-(defn recipe [_]
-  (rur/response (selmer/render-file (io/resource "templates/recipe.html")
-                                    {:name "salim"
-                                     :recipes [{:id 1 :img "test1.jpg" :description "نضع زيت الزيتون في المقلاة"}
-                                               {:id 2 :img "test2.jpg" :description "نقطع الخضراوات على شكل مربعات"}]})))
+(defn recipe [{{:keys [recipe-id]} :path-params}]
+  (let [recipe-id (try (Integer/parseInt recipe-id)
+                       (catch Exception e (println "recipe-id is not Integer it is" recipe-id) 0)
+                       #_(finally (println "recipe-id is not Integer it is" recipe-id)
+                                (println recipe-id (type recipe-id))))]
+    (rur/response
+     (selmer/render-file "recipe.html"
+                         (get-in @db-dev [::db/recipes recipe-id])))))
 
 (defn echo [req]
   (println "doing echo!!")
@@ -147,14 +148,15 @@
                      :get echo
                      :post echo}]
            ["/dashboard" dashboard]
-           ["/start" {:name ::recipe
-                      :get recipe}]
+           ["/recipes/cook/:recipe-id" {:name ::recipe
+                                        :get recipe}]
            api-routes]
           #_{:data {:muuntaja m/instance
                     :middleware [parameters-middleware
                                  format-middleware
                                  exception-middleware]}
              :exception pretty/exception})))
+(def prod-router (constantly (router-gen)))
 (def app
   (ring/ring-handler
    ;; ring/router the value
@@ -172,26 +174,26 @@
           (jetty/run-jetty #'app {:port 3000, :join? false :host "0.0.0.0"}))
   ;; to stop run (.stop server)
   (println "jetty server running in port 3000"))
-(defn start []
-  (println "starting httpkit server at port" (service-map :port))
-  (reset! server
-          (run-server app service-map service-map)))
-(defn stop []
-  (when-not (nil? @server)
-    (println "stop server")
-    (server-stop! @server)
-    #_(@server :timeout 100)
-    (reset! server nil)))
-(defn restart []
-  (println "restart server")
-  (stop)
-  (start))
+;; (defn start []
+;;   (println "starting httpkit server at port" (service-map :port))
+;;   (reset! server
+;;           (run-server app service-map service-map)))
+;; (defn stop []
+;;   (when-not (nil? @server)
+;;     (println "stop server")
+;;     (server-stop! @server)
+;;     #_(@server :timeout 100)
+;;     (reset! server nil)))
+;; (defn restart []
+;;   (println "restart server")
+;;   (stop)
+;;   (start))
 
 (comment
   (start-dev)
   ;; (restart)
   ;; setup for development
-  
+  @server-dev
   (do
     (require '[clojure.java.javadoc :as jdoc]
              '[clojure.reflect :as reflect]
@@ -227,6 +229,8 @@
   (app {:request-method :post :uri "/login"})
   (app {:request-method :get, :uri "/assets/favicon.png"})
   (app {:request-method :get, :uri "/"})
+
+  (app {:request-method :get :uri "/recipes/cook/0"})
 
   :rfc)
 ;; => nil

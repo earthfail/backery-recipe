@@ -5,7 +5,12 @@
 ;; https://cljdoc.org/d/com.github.seancorfield/next.jdbc/1.3.847/doc/getting-started/tips-tricks#working-with-json-and-jsonb
 ;; https://cljdoc.org/d/com.github.seancorfield/next.jdbc/1.3.847/doc/getting-started?q=pool#connection-pooling
 
-(defonce db-dev (atom {::users [{:email "salim@gmail.com", :password "1234"}]}))
+(defonce db-dev (atom {::users [{:email "salim@gmail.com", :password "1234"}]
+		       ::recipes
+		       [{:name "salim"
+			 :page 0
+                         :recipes [{:id 1 :img "test1.jpg" :description "نضع زيت الزيتون في المقلاة"}
+                                   {:id 2 :img "test2.jpg" :description "نقطع الخضراوات على شكل مربعات"}]}]}))
 
 (defn create-user [email name password]
   (let [hashed-password (derive password {:alg :bcrypt+blake2b-512 :iterations 12})
