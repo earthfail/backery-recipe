@@ -1,11 +1,17 @@
 # backery recipes
 
+# TO DO
+- fix project structure to accommodate for minified templates and pages
+
 # DESCRIPTION
 
 إفطار سُهيل هو موقع لنشر طرق تحضير وتقديم الطعام مع ارشاد صوتي ومؤقت
 
 # SOFTWARE
-
+## java
+to run uber file / jar file run `java -jar jarfile`
+## Clojure
+to build the directory run `clojure -T:build uber`
 ## clojurescript
 the build tool I choose is shadow-cljs. Installed using the command `npm install --save-dev shadow-cljs` but could get the same result with `npm add shadow-cljs -D`.
 for development run `npx shadow-cljs watch <BUILD-ID>` where BUILD-ID is define in `shadow-cljs.edn`. As an example `npx shadow-cljs watch register`
@@ -44,6 +50,8 @@ testing equality is with one equal sign like in clojure instead of two equal sig
 
 ## list properties of javascript object
 there are two way in javascript, first with `Object.keys(obj)` and second with `for(let prop in obj){...}`. In Clojurescript we can convert the first option to the form `(js/Object.keys obj)` and second solution is from [stackoverflow](https://stackoverflow.com/questions/31143674/how-to-list-the-properties-and-functions-of-a-javascript-object-in-clojurescript#31224012) `(js-keys carouselslide)`
+## minify static files
+Since I use tailwindcss it handles minifing css files and same for clojurescript and shadow-cljs. As for html, I opted for [asset-minifier](https://github.com/yogthos/asset-minifier/blob/master/src/asset_minifier/core.clj) but unfortunately it is undocumented. Here are the info for minifying html. To use `asset-minifier.core/minify-html` we provide source directory, target directory and **mandatory** options. options are same for [html-compressor/compressor](https://github.com/alehatsman/clj-html-compressor#config-options-with-default-values). for example: simple map `{:enabled true}`
 # Copyright 2023 Salim Khatib
 # LICENSE
 backery-recipe is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.

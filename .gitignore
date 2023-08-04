@@ -2,13 +2,14 @@
 .shadow-cljs
 target
 node_modules
+.idea
+.env
 
 **~
 /notice
 .nrepl-port
 /.cpcache/
 .clj-kondo
-/public/js/
 
 # ClojureDart
 .cpcache/
@@ -18,3 +19,6 @@ test/cljd-out/
 /.dart_tool/
 /build/
 dev/data
+
+public/js
+public/css
