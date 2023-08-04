@@ -20,6 +20,7 @@ test/cljd-out/
 /build/
 dev/data
 
+src/js
 public/js
-public/css
+public/css/
 .rebel_readline_history

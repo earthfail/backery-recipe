@@ -84,7 +84,7 @@
                                     {:name "salim"})))
 (defn recipe [{{:keys [recipe-id]} :path-params}]
   (let [recipe-id (try (Integer/parseInt recipe-id)
-                       (catch Exception e (println "recipe-id is not Integer it is" recipe-id) 0)
+                       (catch Exception _ (println "recipe-id is not Integer it is" recipe-id) 0)
                        #_(finally (println "recipe-id is not Integer it is" recipe-id)
                                 (println recipe-id (type recipe-id))))]
     (rur/response
