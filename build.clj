@@ -14,7 +14,11 @@
 
 (defn clean [_]
   (b/delete {:path "target"})
-  (println (format "Build folder \"%s\" removed" build-folder)))
+  (println (format "Build folder \"%s\" removed" build-folder))
+  (b/delete {:path "minified"})
+  (println (format "minified folder \"%s\" removed" "minified"))
+  (b/delete {:path "tmp"})
+  (println "tmp folder removed"))
 
 (defn compile-css [_]
   (doseq [css-file (.list (io/file "styles"))]
@@ -25,9 +29,9 @@
   (b/process {:command-args ["npx" "shadow-cljs" "release" "recipe" "register"]}))
 (defn minify-html [_]
   (println "minify html templates...")
-  (am/minify-html "dev/resources/templates" "resources/templates" {:enabled true :remove-comments true :remove-multi-spaces true :compress-css true})
+  (am/minify-html "resources/templates" "minified/templates" {:enabled true :remove-comments true :remove-multi-spaces true :compress-css true})
   (println "minify html files...")
-  (am/minify-html "dev/resources/html" "public" {:enabled true :remove-comments true :remove-multi-spaces true :compress-css true})
+  (am/minify-html "public" "minified/pages" {:enabled true :remove-comments true :remove-multi-spaces true :compress-css true})
 )
 (defn minify [_]
   (minify-html nil)
@@ -41,20 +45,32 @@
   ; (compile-cljs nil)
   ; (b/delete {:path "public/js/cljs-runtime"})
   ; (b/delete {:path "public/js/manifest.edn"})
-
+  (minify-html nil)
+  (b/copy-dir {:src-dirs ["resources"]
+               :target-dir "tmp/resources"})
+  (b/copy-dir {:src-dirs ["minified/templates"]
+               :target-dir "tmp/resources/templates"})
+  (b/copy-dir {:src-dirs ["public"]
+               :target-dir "tmp/public"})
+  (b/copy-dir {:src-dirs ["minified/pages"]
+               :target-dir "tmp/public"})
   ; (println "minify html+css")
   ; (minify nil)
-  
-  (b/copy-dir {:src-dirs ["resources" "public"]
+  (b/copy-dir {:src-dirs ["tmp/resources"]
                :target-dir jar-content})
-  (b/compile-clj {:basis basis
-                  :src-dirs ["src"]
-                  :class-dir jar-content})
-  (b/uber {:class-dir jar-content
-           :uber-file uber-file-name
-           :basis basis
-           ;; :main 'khsalim.backend.server
-           :main 'khsalim.backend.core
-           })
+  (b/copy-dir {:src-dirs ["tmp/public"]
+               :target-dir (str jar-content "/public")})
+
+  (b/delete {:path "tmp"})
+  
+  ;; (b/compile-clj {:basis basis
+  ;;                 :src-dirs ["src"]
+  ;;                 :class-dir jar-content})
+  ;; (b/uber {:class-dir jar-content
+  ;;          :uber-file uber-file-name
+  ;;          :basis basis
+  ;;          ;; :main 'khsalim.backend.server
+  ;;          :main 'khsalim.backend.core
+  ;;          })
   (println (format "Uber file created \"%s\"" uber-file-name)))
 

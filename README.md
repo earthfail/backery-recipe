@@ -17,15 +17,19 @@ the build tool I choose is shadow-cljs. Installed using the command `npm install
 for development run `npx shadow-cljs watch <BUILD-ID>` where BUILD-ID is define in `shadow-cljs.edn`. As an example `npx shadow-cljs watch register`
 
 # typescript
-STATUS: not working
-initialized with the command `npx tsc --init`.
+STATUS: TESTING
+initialized with the command `npx tsc --init`. Compile with `npx tsc`
 
 # shadcn/ui
-
 shadcn is componentless library for react. it requires typescript.
 - initilized with `npm shadcn-ui@latest init`
-- add component with `npx shadcn-ui@latest add`
+- add component with `npx shadcn-ui@latest add` or just copy it to `src/ts`
 
+# tailwindcss
+we can compile css directly with tailwindcss with the command `npx tailwindcss -i resources/styles/input.css -o public/css/output.css --watch` and if we replace the watch flag with `--minify` tailwindcss will output a minified file.
+## postcss
+Fortunately we can also watch multiple files at the same time with postcss-cli. If we store styles in `resources/styles` and output css to `public/css` then the watch command is:
+`npx postcss-cli resources/styles --dir public/css --watch`
 # Browser-sync
 for live server reloading with basic html and css. Install with `npm install -g browser-sync`. Run with `browser-sync start --server --files 'public/*'` if you want a static server. In case you are using the backend run `browser-sync start --proxy "localhost:3000" --files "public/**/*" "resources/**/*" "src/**/*"`
 # clojuredart

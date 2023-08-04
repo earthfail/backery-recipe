@@ -1,14 +1,14 @@
 /** @type {import('tailwindcss').Config} */
-let content = ["./src/main/**/*.{clj,cljs}"]
-if(process.env.PROJ_ENV === 'dev'){
-    console.log("dev");
-    content.push("./dev/resources/templates/**/*.{html,js}");
-    content.push("./dev/resources/html/*.{html,js}");
-}else{
-    console.log("not dev" + process.env.PROJ_ENV);
-    content.push("./resources/templates/**/*.{html,js}");
-    content.push("./public/*.{html,js}");
-}
+let content = ["./src/main/**/*.{clj,cljs}","./resources/templates/**/*.{html,js}","./public/*.{html,js}"]
+//if(process.env.PROJ_ENV === 'dev'){
+//    console.log("dev");
+//    content.push("./dev/resources/templates/**/*.{html,js}");
+//    content.push("./dev/resources/html/*.{html,js}");
+//}else{
+//    console.log("not dev" + process.env.PROJ_ENV);
+//    content.push("./resources/templates/**/*.{html,js}");
+//    content.push("./public/*.{html,js}");
+//}
 module.exports = {
 	    content: content,
 	    theme: {
