@@ -1,8 +1,17 @@
 /** @type {import('tailwindcss').Config} */
-// "/src/main/khsalim/frontend/**/*"
+let content = ["./src/main/**/*.{clj,cljs}"]
+if(process.env.PROJ_ENV === 'dev'){
+    console.log("dev");
+    content.push("./dev/resources/templates/**/*.{html,js}");
+    content.push("./dev/resources/html/*.{html,js}");
+}else{
+    console.log("not dev" + process.env.PROJ_ENV);
+    content.push("./resources/templates/**/*.{html,js}");
+    content.push("./public/*.{html,js}");
+}
 module.exports = {
-    content: ["./public/*.{html,js}","./resources/statics/**/*.{html,js}","./resources/templates/**/*.{html,js}","./src/main/**/*.{clj,cljs}"],
-    theme: {
+	    content: content,
+	    theme: {
 	screens: {
 	    sm: '480px',
 	    md: '768px',

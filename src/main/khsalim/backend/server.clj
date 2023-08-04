@@ -90,6 +90,11 @@
     (rur/response
      (selmer/render-file "recipe.html"
                          (get-in @db-dev [::db/recipes recipe-id])))))
+(defn make-recipe [_]
+  (rur/file-response "public/make.html")
+  #_(rur/response
+     (selmer/render-file "recipe.html"
+                         (get-in @db-dev [::db/recipes recipe-id]))))
 
 (defn echo [req]
   (println "doing echo!!")
@@ -150,6 +155,8 @@
            ["/dashboard" dashboard]
            ["/recipes/cook/:recipe-id" {:name ::recipe
                                         :get recipe}]
+           ["/recipes/make" {:name ::make
+                             :get make-recipe}]
            api-routes]
           #_{:data {:muuntaja m/instance
                     :middleware [parameters-middleware

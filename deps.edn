@@ -23,7 +23,11 @@
   com.taoensso/sente {:mvn/version "1.17.0"}
   ;; JWT
   ;; https://github.com/sikt-no/clj-jwt
-  com.github.sikt-no/clj-jwt {:git/tag "0.4.7" :git/sha "bc23acb"}
+  com.github.sikt-no/clj-jwt {
+                              :git/sha "bc23acb3c7cbf0d2def2d395c3e3d9c405be28d5"
+                              ;; https://ask.clojure.org/index.php/11644/re-building-without-internet-access-with-nix?show=11694#c11694
+                              ;; :git/tag "0.4.7"
+                              }
   ;; https://github.com/funcool/buddy-auth
   ;; https://github.com/funcool/buddy-hashers
   buddy/buddy-auth {:mvn/version "3.0.323"}
@@ -39,13 +43,18 @@
   ;; alternative
   ;; https://github.com/metosin/jsonista
   ;;metosin/jsonista {:mvn/version "0.3.7"}
+  ;; enviroment variables
+  ;; https://github.com/juxt/aero
+  aero/aero {:mvn/version "1.1.6"}
   ;; clojure dart
   ;; https://github.com/Tensegritics/ClojureDart/tree/main
   tensegritics/clojuredart {:git/url "https://github.com/tensegritics/ClojureDart.git"
                             :sha "ae1b485e84ccc35b122f776dfc7cc62198274701"}
   }
  :aliases
- {:build {:deps {io.github.clojure/tools.build {:mvn/version "0.9.3"}}
+ {:build {:deps {io.github.clojure/tools.build {:mvn/version "0.9.3"}
+		 ;; https://github.com/yogthos/asset-minifier
+		 asset-minifier/asset-minifier {:mvn/version "0.2.7"}}
           :ns-default build}
   :rebel {:extra-deps {com.bhauman/rebel-readline {:mvn/version "0.1.4"}
                        com.h2database/h2 {:mvn/version "1.4.199"}}
