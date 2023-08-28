@@ -4,6 +4,7 @@ target
 node_modules
 .idea
 .env
+tsconfig.tsbuildinfo
 
 **~
 /notice
@@ -21,6 +22,6 @@ test/cljd-out/
 dev/data
 
 src/js
-public/js
-public/css/
+public/
 .rebel_readline_history
+/resources/config.edn
