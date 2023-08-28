@@ -58,12 +58,20 @@ It finally clicked with me that Github api can work with JWT+refresh token in th
 There should also be extra care to handle the case where user does exist in a database but as a temporary user[^2]. Meaning, the user didn't sign in with github ( or any authorization server implemented in the future) but can access an account via JWT+refresh token.
 
 ## sending data to browser
-I thought of several option, first to simple send another request after receiving the page. The tradeoff is of course the extra overhead of tcp and http request. Another solution is to embed the data in html document. [MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#embedding_data_in_html) suggests a script tag with json. For this solution to work I had to send data in a json format and specify that it is safe for templating library I use [selmer](https://github.com/yogthos/Selmer#json). A slight modification to the last solution is to embed the data in a div tag. This has the advantage of not relying on the safe option but need to hide the div with display:hidden
+I thought of several option, first to simply send another request after receiving the page. The tradeoff is of course the extra overhead of tcp and http request. Another solution is to embed the data in html document. [MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script#embedding_data_in_html) suggests a script tag with json. For this solution to work I had to send data in a json format and specify that it is safe for templating library I use [selmer](https://github.com/yogthos/Selmer#json). A slight modification to the last solution is to embed the data in a div tag. This has the advantage of not relying on the safe option but need to hide the div with display:hidden
 
 Conclusion, I choose the mdn solution because it is semantically correct and doesn't have vulnerabilities
 
 ## sending data from browser
 the [fetch api](https://devdocs.io/dom/fetch_api/using_fetch) is great for handling http requests. You can upload json, file and even [abort request](https://devdocs.io/dom/abortcontroller).
+
+## redirect in javascript
+a great answer on [stackoverflow](https://stackoverflow.com/questions/4744751/how-do-i-redirect-with-javascript). Here is the summary: there are three means to achieve redirects:
+1. `window.location="newUrl"` will redirect to url and save currect page in browser history.
+2. `window.location.replace="newUrl"` will redirect to url but will not keep currect page in session history, simulating an HTTP redirect.
+3. `window.href="newUrl"` simulate clicking an `a` (anchor) tag. Same behavior as replace.
+
+window object can be omitted in 1,2 since it is global.
 
 ## if statement in selmer templating library
 I thought of using a data attribute to indicate if an image should appear or not in recipe.html but decided to go with another route instead.
