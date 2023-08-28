@@ -20,7 +20,7 @@
 <body class="flex flex-col sm:w-full md:w-1/2 md:mx-auto min-h-screen relative">
     <header class="flex flex-row justify-between px-4 py-2 bg-secondery">
 	<span class="font-amiri text-lg">أطباق سُهيل</span>
-	<button class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-secondery text-black shadow hover:bg-primary/90 hover:text-white focus:bg-grass focus:text-white h-9 px-4 py-2 border-2 border-black" type="button">حسابي</button>
+	    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-secondery text-black shadow hover:bg-primary/90 hover:text-white focus:bg-grass focus:text-white h-9 px-4 py-2 border-2 border-black" type="button" id="signin-btn" >حسابي</button>
     </header>
     <section class="bg-gradient-to-b from-secondery from-30% to-background h-1/4 px-4 pt-8 pb-4">
 	<picture>
@@ -82,7 +82,17 @@
     <footer class="flex flex-row justify-center w-full py-4 bg-accent2 text-white font-amiri font-semibold leading-3">
 	سليم خطيب
     </footer>
-    
+    <script type="text/javascript">
+     let redirectUri="https://github.com/login/oauth/authorize?client_id={{client-id}}&redirect_uri={{redirect-uri}}"
+     let signinBtn=document.getElementById("signin-btn");
+     signinBtn.addEventListener("click", (e)=>{
+	 if(localStorage.getItem("refreshToken")===null){
+	     window.location.href=redirectUri;
+	 }else{
+	     window.location="/dashboard";
+	 }
+     });
+    </script>
     <!-- <div id="app"></div>
 	 <script src="/js/register.js"></script>
     -->

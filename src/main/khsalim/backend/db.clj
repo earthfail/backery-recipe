@@ -19,12 +19,12 @@
 (def ds (jdbc/get-datasource db-lite))
 
 (defn log-message [message]
-  (jdbc/execute! ds ["INSERT INTO logs(message,time_stamp) VALUES(?,?)" message (java.util.Date.)]))
+  (jdbc/execute! ds ["INSERT INTO logs(message,time_stamp) VALUES(?,datetime())" message]))
 
 (defn insert-refresh-token [ds [token user-id  :as record]]
   (jdbc/execute!
    ds
-   ["UPDATE users SET refresh_token=? WHERE id=?" record]))
+   (into ["UPDATE users SET refresh_token = ? WHERE id=?;"] record)))
 (defn create-authenticated-user
   "second argument is of the form [name email authorization-server authorization-server-refresh-token avatar-url]"
   [ds [name email authorization-server authorization-server-refresh-token avatar-url :as user-record]]
@@ -36,29 +36,13 @@
                "ON CONFLICT (email)"
                "DO UPDATE SET (name,authorization_server,authorization_server_refresh_token,avatar_url)"
                "=(excluded.name,excluded.authorization_server,excluded.authorization_server_refresh_token,excluded.avatar_url)"
-               "WHERE authorization_server IS NULL"
+               "WHERE authorization_server IS NULL OR authorization_server = excluded.authorization_server "
                "RETURNING id,name,email")]
          user-record)))
-(defn create-user [email name password]
-  (let [hashed-password (derive password {:alg :bcrypt+blake2b-512 :iterations 12})
-        created-user {:email email :name name :password hashed-password}]
-    (swap! db-dev update ::users conj created-user)
-    (dissoc created-user :password)))
-(defn get-user-by-credentials [email password]
-  (if-let [entry (first (filter #(= (:email %) email) (::users @db-dev)))]
-    (verify password (:password entry))
-    {:valid false
-     :message "email doesn't exist"}))
-(defn get-user-by-email [email]
-  (if-let [entry (first (filter #(= (:email %) email) (::users @db-dev)))]
-    (dissoc entry :password)))
-
 (defn get-user-recipes [ds user-id]
-  (jdbc/execute! ds ["SELECT \"recipe-id\",description as name FROM \"users-recipes\" WHERE \"user-id\"=?" user-id] {:builder-fn rs/as-unqualified-lower-maps}))
-
-(defn get-recipe-steps [ds recipe-id]
-  (jdbc/execute! ds ["SELECT step,description,media,\"media-type\" FROM \"recipes-steps\" WHERE \"recipe-id\"=?" recipe-id]
+  (jdbc/execute! ds ["SELECT \"recipe-id\",name,description FROM \"users-recipes\" WHERE \"user-id\"=?" user-id]
                  {:builder-fn rs/as-unqualified-lower-maps}))
+
 (comment
   ;; next.jdbc
 
@@ -66,11 +50,18 @@
 
   ;; (jdbc/execute! ds2 ["insert into users(name) values(\"salim\"),(\"mariam\")"])
   (jdbc/execute! ds ["select * from users"])
-  (jdbc/execute! ds ["select * from \"users-recipes\""])
+  (jdbc/execute! ds ["select * from \"users-recipes\""]
+                 {:builder-fn rs/as-unqualified-lower-maps})
   (jdbc/execute! ds ["select * from \"recipes-steps\""])
   (jdbc/execute! ds ["select * from \"logs\""])
 
+  (create-authenticated-user ds ["name" "email" "githubdub" "refresh-token" "avatar-url"])
   (create-authenticated-user ds ["salim4" "surrlim@gmail.com" "github" "adfa_vvvv"])
+
+  (insert-refresh-token ds ["abc" 37])
+
+  (jdbc/execute! ds ["SELECT * from users where id= :id" {"id" 1}])
+  
   :rfc)
 
 (comment
@@ -82,6 +73,26 @@
   (derive "1234" {:alg :bcrypt+blake2b-512 :iterations 12})
   ;; => "bcrypt+blake2b-512$8d7ee2a7d6f33f6f59264d04b4e312f8$12$580e06b49a52fb68c1c43e9ec11ebe9f89c318e2412e04df"
   ;; => "bcrypt+blake2b-512$4953bdb8d25f9df16d364dc55bb0ec5d$10$d51d871f028100cdafeb3dea4e34c346a54013f872e02367"
+  :rfc)
 
-  
-  )
+(comment 
+  (defn create-user [email name password]
+    (let [hashed-password (derive password {:alg :bcrypt+blake2b-512 :iterations 12})
+          created-user {:email email :name name :password hashed-password}]
+      (swap! db-dev update ::users conj created-user)
+      (dissoc created-user :password)))
+  (defn get-user-by-credentials [email password]
+    (if-let [entry (first (filter #(= (:email %) email) (::users @db-dev)))]
+      (verify password (:password entry))
+      {:valid false
+       :message "email doesn't exist"}))
+  (defn get-user-by-email [email]
+    (if-let [entry (first (filter #(= (:email %) email) (::users @db-dev)))]
+      (dissoc entry :password)))
+
+  (defn get-user-recipes [ds user-id]
+    (jdbc/execute! ds ["SELECT \"recipe-id\",description as name FROM \"users-recipes\" WHERE \"user-id\"=?" user-id] {:builder-fn rs/as-unqualified-lower-maps}))
+
+  (defn get-recipe-steps [ds recipe-id]
+    (jdbc/execute! ds ["SELECT step,description,media,\"media-type\" FROM \"recipes-steps\" WHERE \"recipe-id\"=?" recipe-id]
+                   {:builder-fn rs/as-unqualified-lower-maps})))

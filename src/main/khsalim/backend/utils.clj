@@ -16,22 +16,22 @@
 
 (def config (read-config (io/resource "config.edn")))
 
-(when (= (get config :env) :dev)
-  (require '[clojure.java.javadoc :as jdoc]
-             '[clojure.reflect :as reflect]
-             '[clojure.inspector :as insp]
-             '[clojure.pprint :as pp]
-             '[clojure.repl :as repl])
-  (jdoc/add-remote-javadoc "org.eclipse.jetty.server" "https://www.eclipse.org/jetty/javadoc/jetty-9/")
-  :required)
-
-(def static-files-root (if (= (get config :env :dev) :dev)
-                         "resources/pages"
-                         "public"))
+(def static-files-root (if (get config :dev true)
+                           "resources/pages"
+                           "public"))
 (def jwt-secret (get-in config [:jwt-secret 0]))
-(def jwt-refresh-secret (get-in config [:jwt-refresh-secret]))
+(def jwt-refresh-secret (get-in config [:jwt-refresh-secret 0]))
 ;; {:secret jwt-secret :on-error println}
 (def buddy-backend (jws {:secret @#'jwt-secret}))
+
+(when (get config :dev)
+      (require '[clojure.java.javadoc :as jdoc]
+               '[clojure.reflect :as reflect]
+               '[clojure.inspector :as insp]
+               '[clojure.pprint :as pp]
+               '[clojure.repl :as repl])
+      (jdoc/add-remote-javadoc "org.eclipse.jetty.server" "https://www.eclipse.org/jetty/javadoc/jetty-9/")
+      :required)
 
 (defn wrap-jwt-authentication
   "check `authorization` header in http request for the expression \"Token [token]\""
@@ -91,7 +91,8 @@
                  :body)]
     {:name (get info :login)
      :avatar-url (get info :avatar_url)}))
-
+(defn insert-link [prefix mrecipe]
+  (assoc mrecipe :link (str prefix (mrecipe :recipe-id))))
 (comment
 
   (github-user-email "ghu_kFg6DzkfhhumRecL8aAktnw2PbzOpw1I9ne7")
@@ -101,7 +102,8 @@
 
   jwt-secret
   buddy-backend
-  (create-token {:name "salim" :id "3"})
+  (create-token {:name "salim" :id "1"})
+  (create-tokens {:id 30})
 
   (jwt/unsign "eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoic2FsaW0iLCJpZCI6IjMifQ.ncgLP5Ovsr6xYTdot5l7d3uO_kxVVw-D3TLg8ivDCxk"
               jwt-secret)

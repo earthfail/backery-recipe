@@ -34,10 +34,10 @@
 (set! *warn-on-reflection* true)
 (selmer/set-resource-path! (io/resource "templates"))
 
-(def environment (get config :env :dev))
+(def dev (get config :dev true))
 (def jwt-cookie-name "JWT_TOKEN")
 
-(when (= environment :dev)
+(when dev
   (require '[clojure.java.javadoc :as jdoc]
            '[clojure.reflect :as reflect]
            '[clojure.inspector :as insp]
@@ -53,7 +53,7 @@
            (fn ds-handler [req]
              (dissoc
               (handler
-               (assoc req :ds db/ds))
+               (assoc req :ds @#'db/ds))
               :ds)))})
 (def echo-middleware
   {:name ::echo
@@ -65,7 +65,7 @@
 (defn static-file
   ([file-name] (static-file file-name {}))
   ([file-name context-map]
-   (if (= environment :dev)
+   (if dev
      (fn [_] (rur/response (selmer/render-file (io/resource (str "pages/" file-name))  context-map)))
      (fn [_] (rur/file-response (str "public/" file-name))))))
 
@@ -114,9 +114,7 @@
             (println "I'm here")
             {:status 400 :body message})))
       {:status 400 :body "email or password messing. must be in a form urlencoded to login"})))
-(defn dashboard [_]
-  (rur/response (selmer/render-file "dashboard.html"
-                                    {:name "salim"})))
+
 (defn recipe [{{:keys [recipe-id]} :path-params}]
   (let [recipe-id (try (Integer/parseInt recipe-id)
                        (catch Exception _ (db/log-message (str "recipe-id is not Integer it is " recipe-id)) 0))]
@@ -124,7 +122,7 @@
      (selmer/render-file "recipe.html"
                          (get-in @db-dev [::db/recipes recipe-id])))))
 (defn make-recipe [_]
-  (if (= environment :dev)
+  (if dev
     (rur/response (selmer/render-file (io/resource "pages/make.html") {}))
     (rur/file-response "public/make.html")))
 
@@ -146,34 +144,62 @@
       (rur/created (str "/api/v1/img/" file-name)))
     ;;else
     (rur/bad-request "file type not supported")))
-
-(defn sign-up [{{:strs [code]} :params
-                ds :ds}]
-  (let [result-body-json (ku/github-access-token code)]
+(defn dashboard [{{:keys [id name avatar-url]} :identity
+                  ds :ds}]
+  (let [recipes (db/get-user-recipes ds id)
+        linked-recipes (map (partial ku/insert-link "/recipes/cook/") recipes)]
+    (rur/response
+     (selmer/render-file "dashboard.html"
+                         {:name name
+                          :avatar-url avatar-url
+                          :recipes linked-recipes}))))
+(defn sign-up [{:keys [params ds]}]
+  (let [{:strs [code]} params
+        result-body-json (ku/github-access-token code)]
+    (when dev
+      (println "body-json " result-body-json))
     (if-let [atoken (get result-body-json "access_token")]
       (let [email (ku/github-user-email atoken)
             {:keys [name avatar-url]} (ku/github-user-info atoken)
-            {:users/keys [id]} (db/create-authenticated-user
-                                ds
-                                [name email "github" (get result-body-json "refresh_token") avatar-url])
-            [refresh-token token] (ku/create-tokens {:id id :email email :name name})]
-        (db/insert-refresh-token ds [refresh-token id])
-        (rur/set-cookie
-         (rur/response {:message "Successfully authorized!"
-                        :refresh-token refresh-token
-                        :success true})
-         jwt-cookie-name token))
+            user-record [name email "github" (get result-body-json "refresh_token") avatar-url]]
+        (when dev
+          (println "email name avatar-url id atoken" email name avatar-url atoken))
+        (if-let [{:users/keys [id]} (db/create-authenticated-user ds user-record)]
+          (let [[refresh-token token] (ku/create-tokens {:id id :avatar-url avatar-url :name name})
+                uri "/dashboard"]
+            (when dev
+              (println "good" id))
+            (db/insert-refresh-token ds [refresh-token id])
+
+            (rur/set-cookie
+             (rur/response
+              (selmer/render-file "signup.html" {:refresh-token refresh-token
+                                                 :name name
+                                                 :redirect-uri uri}))
+             jwt-cookie-name token))
+          ;;else
+          (do
+            (when dev
+              (println "bad"))
+            (rur/bad-request {:message "bad request to get id"
+                              :success false}))))
+      ;;else
       (rur/bad-request {:message "bad request to get token"
                         :success false}))))
 (defn echo [_]
-  {:status 200, :body (str "salim khatib (me)" (java.util.Date.))})
+  (rur/response
+              (selmer/render-file "signup.html" {:refresh-token "abc"
+                                                 :name "seeeso"}))
+  #_{:status 200, :body (str "salim khatib (me)" (java.util.Date.))})
 
 (defn static-routes []
   [["/" {:name ::root
-         :get (static-file "index.html")}]
-   ["/index.html" #_(java.io.File. "public/index.html")
+         :get (static-file "index.html" {:client-id (get-in config [:github :client-id])
+                                         :redirect-uri (get-in config [:github :redirect-uri])}) }]
+   ["/index.html"
     {:name ::landing
-     :get (static-file "index.html")}]
+     :get (static-file "index.html" {:client-id (get-in config [:github :client-id])
+                                         :redirect-uri (get-in config [:github :redirect-uri])}) }]
    ["/tmp.html" (static-file "tmp.html" {:client-id (get-in config [:github :client-id])
                                          :redirect-uri (get-in config [:github :redirect-uri])})]
    ["/assets/*" (ring/create-file-handler)]])
@@ -205,7 +231,7 @@
                             format-middleware
                             parameters-middleware
                             [echo-middleware "signup endpoint!"]]
-               :get sign-up}]])
+               :get @#'sign-up}]])
 
 (defn router-gen []
   (ring/router
@@ -226,6 +252,16 @@
                       :middleware [parameters-middleware
                                    format-middleware
                                    exception-middleware]}}]
+    
+    ["/dashboard" {:get dashboard
+                   :middleware [datasource-middleware
+                                wrap-cookies
+                                [cookie-header-middleware jwt-cookie-name]
+                                [echo-middleware "daaaashboarrrrrd!"]]}]
+    ["/recipes/cook/:recipe-id" {:name ::recipe
+                                 :get recipe}]
+    ["/recipes/make" {:name ::make
+                      :get (static-file "recipe.html")}]
     ["/echo" {:name ::echo
               ;; :middleware [[cookie-header-middleware "user_jwt"] wrap-jwt-authentication auth-middleware] ; old
               :parameters {:multipart [:map [:file malli/temp-file-part]]}
@@ -237,17 +273,8 @@
               :muuntaja m/instance
               :get echo
               :post echo}]
-    ["/dashboard" {:get dashboard
-                   :middleware [datasource-middleware
-                                wrap-cookies
-                                [cookie-header-middleware jwt-cookie-name]
-                                [echo-middleware "daaaashboarrrrrd!"]]}]
-    ["/recipes/cook/:recipe-id" {:name ::recipe
-                                 :get recipe}]
-    ["/recipes/make" {:name ::make
-                      :get (static-file "recipe.html")}]
     (api-routes)]
-   {:reitit.middleware/transform reitit.ring.middleware.dev/print-request-diffs}
+   #_{:reitit.middleware/transform reitit.ring.middleware.dev/print-request-diffs}
    #_{:data {:muuntaja m/instance
              :middleware [parameters-middleware
                           format-middleware
@@ -259,7 +286,8 @@
   "Given a function which builds a reitit router, returns a router which rebuilds
   the router on every call. This makes sure redefining routes in a REPL works as
   expected. Should only every be used in development mode, since it completely
-  undoes all of reitit's great performance."
+  undoes all of reitit's great performance.
+  see `https://github.com/lambdaisland/souk/blob/main/src/lambdaisland/souk/util/dev_router.clj`"
   [new-router]
   (reify rc/Router
     (router-name [_] (rc/router-name (new-router)))
@@ -274,7 +302,7 @@
 (def app
   (ring/ring-handler
    ;; ring/router the value
-   (dev-router router-gen)
+   (dev-router @#'router-gen)
    ;; (router-gen)
    (ring/routes
     #_(ring/redirect-trailing-slash-handler)
@@ -290,10 +318,14 @@
   (app {:request-method :get :uri "/tmp.html"})
   (app {:request-method :get :uri "/api/v1/getUrl"})
   (app {:request-method :get :uri "/assets/img/test1.jpg"})
-  (app {:request-method :get :uri "/signup" :query-string "code=1ac9f0aa84915b6aef69"})
+  (app {:request-method :get :uri "/signup" :query-string "d34fe88648147f014edb"})
   tmp
   res
-  
+
+  (map (partial ku/insert-link "/recipes/cook/")
+                                                 (db/get-user-recipes db/ds 1))
+  (let [{:user/keys [id]} {}]
+    id)
   "ghu_9yrtq6FduvNd0ruJNzNYwNtYmCaB8g3WcfTx"
 
   ;;{"access_token":"ghu_3W2t6HiQoFPMtNwHG7igikOGzuJKpF12hEPu","expires_in":28800,"refresh_token":"ghr_cDKGUAjD9Wd01x1wrL3cW8PYWyyC3HSwYgq2ZNOHcoZ7dStSdlJGSGWUouluwvPFgtvys21z5YiW","refresh_token_expires_in":15897600,"token_type":"bearer","scope":""}
@@ -311,7 +343,6 @@
                         :repositories (merge aether/maven-central
                                              {"clojars" "https://clojars.org/repo"}))
   (require '[clj-http.client :as client])
-  
   (client/post "https://github.com/login/oauth/access_token" {:accept :json
                                              :form-params {:client_id "1"
                                                            :client_secret "2"
