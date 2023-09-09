@@ -69,9 +69,9 @@ the [fetch api](https://devdocs.io/dom/fetch_api/using_fetch) is great for handl
 a great answer on [stackoverflow](https://stackoverflow.com/questions/4744751/how-do-i-redirect-with-javascript). Here is the summary: there are three means to achieve redirects:
 1. `window.location="newUrl"` will redirect to url and save currect page in browser history.
 2. `window.location.replace="newUrl"` will redirect to url but will not keep currect page in session history, simulating an HTTP redirect.
-3. `window.href="newUrl"` simulate clicking an `a` (anchor) tag. Same behavior as replace.
+3. `window.location.href="newUrl"` simulate clicking an `a` (anchor) tag. Same behavior as replace.
 
-window object can be omitted in 1,2 since it is global.
+window object can be omitted since it is global.
 
 ## if statement in selmer templating library
 I thought of using a data attribute to indicate if an image should appear or not in recipe.html but decided to go with another route instead.
