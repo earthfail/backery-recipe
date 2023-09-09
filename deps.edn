@@ -13,6 +13,8 @@
   http-kit/http-kit {:mvn/version "2.6.0"
                      :me/about "html server"
                      :me/url "https://github.com/http-kit/http-kit"}
+
+  org.slf4j/slf4j-simple {:mvn/version "2.0.7"}
   
   javax.servlet/servlet-api {:mvn/version "2.5"}
   ring/ring {:mvn/version "1.9.6"
@@ -100,7 +102,10 @@
 
                       funcool/promesa {:mvn/version "10.0.594"}
                       org.clojure/core.async {:mvn/version "1.6.681"}
-                      cljs-http/cljs-http {:mvn/version "0.1.46"}}
+                      cljs-http/cljs-http {:mvn/version "0.1.46"}
+                      com.lambdaisland/dom-types {:mvn/version "0.5.37"
+                                                  :me/url "https://github.com/lambdaisland/dom-types"
+                                                  :me/about "pretty print browser types"}}
          ;; :extra-paths ["src/main"]
          }
   :cljd {:main-opts ["-m" "cljd.build"]}}
