@@ -101,7 +101,10 @@ should be written as:
 
 ## Deref Clojure Vars
 A simple way to make you code [repl-friendly](https://clojure.org/guides/repl/enhancing_your_repl_workflow) is to derefrence the vars instead of supplying its value. Let `a` be a variable with value `1`. if we define a function that referenced `a` for example `(+ a 4)` then when reading the function `a` will be replaced with `1`. On the other hand, `@#'a` will be read as `(deref (var a))`. There is a video on youtube but I can't seem to find it.
-
+## Generate KeyStore
+to use http2 I stumbled upon [ring-jetty9-adapter](https://github.com/sunng87/ring-jetty9-adapter) and had to generate a .jks file. [oracle](https://docs.oracle.com/cd/E19509-01/820-3503/ggfen/index.html) has a good tutorial how to generate it. The main tool is [keytool](https://docs.oracle.com/javase/10/tools/keytool.htm#JSWOR-GUID-5990A2E4-78E3-47B7-AE75-6D1826259549). keystore password `1234client` and file is in `resources/clientkeystore.jks`. There is also this [answer](https://stackoverflow.com/questions/47434877/how-to-generate-keystore-and-truststore) and this <https://unix.stackexchange.com/questions/347116/how-to-create-keystore-and-truststore-using-self-signed-certificate>. <https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html> <https://docs.oracle.com/cd/E19798-01/821-1751/ghlgv/index.html> <https://www.sslshopper.com/article-most-common-java-keytool-keystore-commands.html>
+### Generate Self Signed Certificate
+	openssl req -x509 -newkey rsa:4096 -nodes -sha256 -subj '/CN=localhost' -keyout localhost-private.pem -out localhost-cert.pem
 # Copyright 2023 Salim Khatib
 
 I would like to publish the project under [AGPL](https://www.gnu.org/licenses/agpl-3.0.html) or a modification of it or [GPL](https://www.gnu.org/licenses/gpl-3.0.txt) but it is incompatible with [clojure[script]](https://clojure.org/community/license) [license](https://www.eclipse.org/org/documents/epl-1.0/EPL-1.0.txt). If anyone knows a way around, please contact me. 

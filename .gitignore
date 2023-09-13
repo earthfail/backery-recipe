@@ -1,3 +1,4 @@
+.rebel_readline_history
 .lsp
 .shadow-cljs
 target
@@ -23,5 +24,9 @@ dev/data
 
 src/js
 public/
-.rebel_readline_history
+
 /resources/config.edn
+/resources/keystore
+vault
+
+public/css/*

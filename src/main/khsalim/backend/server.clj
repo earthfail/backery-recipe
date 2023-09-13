@@ -4,14 +4,10 @@
    [khsalim.backend.routers :as krouters :refer [app]]
    
    ;; [org.httpkit.server :refer [run-server server-stop!]]
-   [ring.adapter.jetty :as jetty]
+   ;; [ring.adapter.jetty :as jetty]
+   [clojure.java.io :as io]
+   [ring.adapter.jetty9 :as jetty]
    ))
-;;  Startup: /usr/local/bin/clojure -Sdeps \{\:deps\ \{nrepl/nrepl\ \{\:mvn/version\ \"1.0.0\"\}\ cider/cider-nrepl\ \{\:mvn/version\ \"0.31.0\"\}\ cider/piggieback\ \{\:mvn/version\ \"0.5.2\"\}\}\ \:aliases\ \{\:cider/nrepl\ \{\:main-opts\ \[\"-m\"\ \"nrepl.cmdline\"\ \"--middleware\"\ \"\[cider.nrepl/cider-middleware\,cider.piggieback/wrap-cljs-repl\]\"\]\}\}\} -M:cider/nrepl
-
-;; WARNING: CIDER 1.8.0-snapshot requires cider-nrepl 0.31.0, but you're currently using cider-nrepl 0.22.4. The version mismatch might break some functionality! (More information)
-;; WARNING: update-vals already refers to: #'clojure.core/update-vals in namespace: cider.nrepl.inlined-deps.orchard.v0v5v3.orchard.misc, being replaced by: #'cider.nrepl.inlined-deps.orchard.v0v5v3.orchard.misc/update-vals
-;; WARNING: update-keys already refers to: #'clojure.core/update-keys in namespace: cider.nrepl.inlined-deps.orchard.v0v5v3.orchard.misc, being replaced by: #'cider.nrepl.inlined-deps.orchard.v0v5v3.orchard.misc/update-keys
-
 (defonce server (atom nil))
 (defonce server-dev (atom nil))
 
@@ -20,10 +16,21 @@
 (def service-map
   {:port 3000
    :legacy-return-value? false
-   :join? false})
+   :join? false
+   :ssl? true :ssl-port 3443
+   :h2? true :hc2? true
+   :keystore  (.getFile (io/resource "keystore/adapterjetty9/my-keystore.jks")) :key-password "password" :keystore-type "PKCS12"
+   :truststore (.getFile (io/resource "keystore/adapterjetty9/my-truststore.jks")) :trust-password "password" :truststore-type "PKCS12"
+   :sni-host-check? false
+   :host "0.0.0.0"})
+(def dev-service-map
+  {:port 3000
+   :legacy-return-value? false
+   :join? false
+   :host "0.0.0.0"})
 (defn start-dev []
   (reset! server-dev
-          (jetty/run-jetty #'app {:port 3000, :join? false :host "0.0.0.0"}))
+          (jetty/run-jetty #'app dev-service-map))
   ;; to stop run (.stop server)
   (println "jetty server running in port 3000"))
 
@@ -34,7 +41,9 @@
   ;; (restart)
   ;; setup for development
   @server-dev
-  (.stop @server-dev)
+
+  (jetty/stop-server @server-dev)
+  ;; (.stop @server-dev)
   ;; (.start @server-dev)
   (do
     (require '[clojure.java.javadoc :as jdoc]
