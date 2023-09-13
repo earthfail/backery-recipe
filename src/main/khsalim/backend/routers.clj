@@ -43,7 +43,7 @@
            '[clojure.inspector :as insp]
            '[clojure.pprint :as pp]
            '[clojure.repl :as repl])
-  (jdoc/add-remote-javadoc "org.eclipse.jetty.server" "https://www.eclipse.org/jetty/javadoc/jetty-9/")
+  ;;(jdoc/add-remote-javadoc "org.eclipse.jetty.server" "https://www.eclipse.org/jetty/javadoc/jetty-9/")
   :required)
 
 
@@ -86,7 +86,7 @@
       (swap! db-dev update order-id update :touched inc)
       (rur/created (str server-name ":" server-port uri) "url made"))
     (rur/bad-request "bad request")))
-(defn add-user [{:keys [params] :as req}]
+#_(defn add-user [{:keys [params] :as req}]
   ;; extract user and password
   (let [email (get params "email")
         password (get params "password")]
@@ -96,7 +96,7 @@
         {:status 200 :body (str "created user" (db/create-user email (str (gensym "user")) password))})
       ;else
       {:status 400 :body "email or password messing. must be in a form urlencoded"})))
-(defn confirm-user [{:keys [params] :as req}]
+#_(defn confirm-user [{:keys [params] :as req}]
   (let [email (get params "email")
         password (get params "password")]
     (if (and email password)
@@ -133,17 +133,19 @@
     (rur/response {:url (str "http://localhost:3000/api/v1/img/" url)})))
 (defn get-img-url [{{:keys [url]} :path-params}]
     (println "asked for url:" url)
-  (rur/file-response (str "public/vault/" url)))
+  (rur/file-response (str "vault/" url)))
 (defn post-img-url [{{:keys [url]} :path-params ,
                      {:strs [media]} :multipart-params}]
   (if (get mime-type->ext (get media :content-type))
     (let [file-name url]
       (println "posting to file:" file-name)
 
-      (io/copy (get media :tempfile) (io/file "public/vault" file-name))
+      (io/copy (get media :tempfile) (io/file "vault" file-name))
       (rur/created (str "/api/v1/img/" file-name)))
     ;;else
     (rur/bad-request "file type not supported")))
+
+
 (defn dashboard [{{:keys [id name avatar-url]} :identity
                   ds :ds}]
   (let [recipes (db/get-user-recipes ds id)
@@ -195,14 +197,17 @@
 (defn static-routes []
   [["/" {:name ::root
          :get (static-file "index.html" {:client-id (get-in config [:github :client-id])
-                                         :redirect-uri (get-in config [:github :redirect-uri])}) }]
+                                         :redirect-uri (get-in config [:github :redirect-uri])})}]
    ["/index.html"
     {:name ::landing
      :get (static-file "index.html" {:client-id (get-in config [:github :client-id])
-                                         :redirect-uri (get-in config [:github :redirect-uri])}) }]
+                                     :redirect-uri (get-in config [:github :redirect-uri])})}]
    ["/tmp.html" (static-file "tmp.html" {:client-id (get-in config [:github :client-id])
                                          :redirect-uri (get-in config [:github :redirect-uri])})]
-   ["/assets/*" (ring/create-file-handler)]])
+   ["/assets/"
+    ["img/*"  (ring/create-resource-handler {:root "img"})]
+    ["js/*"  (ring/create-file-handler {:root "public/js"})]
+    ["css/*" (ring/create-file-handler {:root "public/css"})]]])
 (defn api-routes []
   [["/api"
     ["/v1"
@@ -231,7 +236,7 @@
                             format-middleware
                             parameters-middleware
                             [echo-middleware "signup endpoint!"]]
-               :get @#'sign-up}]])
+               :get sign-up}]])
 
 (defn router-gen []
   (ring/router
@@ -239,7 +244,7 @@
 
     ["/register" {:name ::register
                   :get (static-file "register.html")
-                  :post {:handler add-user
+                  :post {:handler echo #_add-user
                          :muuntaja m/instance
                          :middleware [parameters-middleware
                                       format-middleware
@@ -247,7 +252,7 @@
                                       [echo-middleware "adding user!"]]}}]
 
     ["/login" {:get echo
-               :post {:handler confirm-user
+               :post {:handler echo #_confirm-user
                       :muuntaja m/instance
                       :middleware [parameters-middleware
                                    format-middleware
@@ -319,11 +324,14 @@
   (app {:request-method :get :uri "/api/v1/getUrl"})
   (app {:request-method :get :uri "/assets/img/test1.jpg"})
   (app {:request-method :get :uri "/signup" :query-string "d34fe88648147f014edb"})
+  ((ring/create-resource-handler {:root "img"
+                                  :path "/"}) {:uri "/food.jpg"})
+  (rur/resource-response "food.jpg" {:root "img"})
   tmp
   res
 
   (map (partial ku/insert-link "/recipes/cook/")
-                                                 (db/get-user-recipes db/ds 1))
+       (db/get-user-recipes db/ds 1))
   (let [{:user/keys [id]} {}]
     id)
   "ghu_9yrtq6FduvNd0ruJNzNYwNtYmCaB8g3WcfTx"
