@@ -36,7 +36,7 @@
 
 (def dev (get config :dev true))
 (def jwt-cookie-name "JWT_TOKEN")
-
+(def vault-path (get config :vault "vault"))
 (when dev
   (require '[clojure.java.javadoc :as jdoc]
            '[clojure.reflect :as reflect]
@@ -133,14 +133,13 @@
     (rur/response {:url (str "http://localhost:3000/api/v1/img/" url)})))
 (defn get-img-url [{{:keys [url]} :path-params}]
     (println "asked for url:" url)
-  (rur/file-response (str "vault/" url)))
+  (rur/file-response (str vault-path "/" url)))
 (defn post-img-url [{{:keys [url]} :path-params ,
                      {:strs [media]} :multipart-params}]
   (if (get mime-type->ext (get media :content-type))
     (let [file-name url]
       (println "posting to file:" file-name)
-
-      (io/copy (get media :tempfile) (io/file "vault" file-name))
+      (io/copy (get media :tempfile) (io/file vault-path file-name))
       (rur/created (str "/api/v1/img/" file-name)))
     ;;else
     (rur/bad-request "file type not supported")))
