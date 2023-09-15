@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-let content = ["./src/main/**/*.{clj,cljs}","./resources/templates/**/*.{html,js}","./public/*.{html,js}"]
+let content = ["./src/**/*.{clj,cljs}","./resources/**/*.{html,js}","./public/*.{html,js}"]
 //if(process.env.PROJ_ENV === 'dev'){
 //    console.log("dev");
 //    content.push("./dev/resources/templates/**/*.{html,js}");

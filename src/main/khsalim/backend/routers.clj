@@ -74,16 +74,16 @@
     (rur/response (render-form info))
     ;;else
     (rur/not-found (str order-id " not found"))))
-(defn confirm-choice [{{:keys [order-id]} :path-params
+(defn confirm-choice [{{:keys [recipe-id]} :path-params
                        headers :headers
                        uri :uri
                        server-name :server-name
                        server-port :server-port}]
   (println "headers " headers)
-  (println "order-id " order-id)
+  (println "order-id " recipe-id)
   (if (= (get headers "hhh") "jjj")
     (do
-      (swap! db-dev update order-id update :touched inc)
+      (swap! db-dev update recipe-id update :touched inc)
       (rur/created (str server-name ":" server-port uri) "url made"))
     (rur/bad-request "bad request")))
 #_(defn add-user [{:keys [params] :as req}]
@@ -121,10 +121,11 @@
     (rur/response
      (selmer/render-file "recipe.html"
                          (get-in @db-dev [::db/recipes recipe-id])))))
-(defn make-recipe [_]
-  (if dev
-    (rur/response (selmer/render-file (io/resource "pages/make.html") {}))
-    (rur/file-response "public/make.html")))
+(defn make-recipe [{ds :ds
+                    {:keys [id]} :identity}]
+  (let [recipe-id (rand-int 100000)]
+    (db/associate-user-recipe ds id recipe-id)
+    (rur/response (selmer/render-file "make.html" {:recipe-id recipe-id}))))
 
 (defn generate-img-url [_]
   (let [url (random-uuid)]
@@ -187,10 +188,18 @@
       ;;else
       (rur/bad-request {:message "bad request to get token"
                         :success false}))))
+(defn upload-recipe [{ds :ds
+                      {:keys [id]} :identity
+                      {:keys [recipe-id]} :path-params,
+                      {:keys [step description url media-type]} :body-params :as req}]
+  ;; (println "req recipe" req)
+  (db/insert-recipe-step ds [recipe-id step description url media-type])
+
+  (rur/response [recipe-id " test " step description url media-type]))
 (defn echo [_]
   (rur/response
-              (selmer/render-file "signup.html" {:refresh-token "abc"
-                                                 :name "seeeso"}))
+   (selmer/render-file "signup.html" {:refresh-token "abc"
+                                      :name "seeeso"}))
   #_{:status 200, :body (str "salim khatib (me)" (java.util.Date.))})
 
 (defn static-routes []
@@ -210,12 +219,21 @@
 (defn api-routes []
   [["/api"
     ["/v1"
-     ["/recipe/:order-id" {:name ::order
-                           :middleware [wrap-jwt-authentication
-                                        auth-middleware
-                                        [echo-middleware "order"]]
-                           :get customer-form
-                           :post confirm-choice}]
+     ["/recipe/:recipe-id" {:name ::order
+                            :muuntaja m/instance
+                            :middleware [#_wrap-jwt-authentication
+                                         #_auth-middleware
+                                         #_format-middleware
+                                         #_[echo-middleware "order"]]
+                            :get customer-form
+                            :post {:handler upload-recipe
+                                   :muuntaja m/instance
+                                   :middleware [datasource-middleware
+                                                wrap-cookies
+                                                [cookie-header-middleware jwt-cookie-name]
+                                                format-middleware
+                                                parameters-middleware
+                                                [echo-middleware "post recipe"]]}}]
      ["/getUrl" {;:name ::order
                                         ;:middleware [wrap-jwt-authentication auth-middleware]
                  :muuntaja m/instance
@@ -256,7 +274,6 @@
                       :middleware [parameters-middleware
                                    format-middleware
                                    exception-middleware]}}]
-    
     ["/dashboard" {:get dashboard
                    :middleware [datasource-middleware
                                 wrap-cookies
@@ -265,7 +282,10 @@
     ["/recipes/cook/:recipe-id" {:name ::recipe
                                  :get recipe}]
     ["/recipes/make" {:name ::make
-                      :get (static-file "recipe.html")}]
+                      :middleware [datasource-middleware
+                                   wrap-cookies
+                                   [cookie-header-middleware jwt-cookie-name]]
+                      :get make-recipe}]
     ["/echo" {:name ::echo
               ;; :middleware [[cookie-header-middleware "user_jwt"] wrap-jwt-authentication auth-middleware] ; old
               :parameters {:multipart [:map [:file malli/temp-file-part]]}
@@ -326,6 +346,8 @@
   ((ring/create-resource-handler {:root "img"
                                   :path "/"}) {:uri "/food.jpg"})
   (rur/resource-response "food.jpg" {:root "img"})
+
+  (app {:request-method :get :uri "recipes/make" :cookie "JWT_TOKEN=eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiYXZhdGFyLXVybCI6Imh0dHBzOi8vYXZhdGFycy5naXRodWJ1c2VyY29udGVudC5jb20vdS8yMTI5NjQ0OD92PTQiLCJuYW1lIjoiZWFydGhmYWlsIn0.Czv61JsFLX5eICWPKfpQYrvVAzlVYyCMm7p_dhdEJro"})
   tmp
   res
 

@@ -1,20 +1,30 @@
 (ns khsalim.frontend.make
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require
-   [helix.core :refer [defnc $]]
+   [helix.core :refer [defnc $ <>]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
    ["react-dom/client" :as rdom]
    [cljs-http.client :as http]
    [cljs.core.async :refer [<!]]
+   [lambdaisland.dom-types]
+
    )
   ;; (:require [clojure.edn :as edn])
   )
 (goog-define VERBOSE true)
 
+;; https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
+;; https://developer.mozilla.org/en-US/docs/Web/API/File_API/Using_files_from_web_applications
+
+(def recipe-id (-> js/document
+                   (.getElementById "data")
+                   .-text
+                   js/JSON.parse
+                   (js->clj :keywordize-keys true)))
 
 (def btn (js/document.getElementById "btn"))
-(defn upload-image! [e]
+(defn upload-image2! [e]
   (go (let [response (<! (http/get "/api/v1/getUrl"))
             url (get-in response [:body :url])
             file (-> js/document
@@ -25,16 +35,134 @@
         (js/console.dir e)
         (prn response))))
 
+#_(def files-state
+  "each file in files-list is a map with keys :desc :file :url.
+  :file - is a File object
+  :url - URL object created by URL.createObjectURL(file) on the associated file object
+  :desc - description"
+  (hooks/use-state []))
+;; (def status-state (hooks/use-state :edit))
+(defnc preview-list [{:keys [files more?]}]
+  (d/ol {:class "preview"}
+        (when more?
+          (d/svg {:stroke "black"
+                  :style {:width "200px" :height "100px" :background "rgba(200,0,0,0.7)"}}
+                 ($ "use" {:href "#plus" :stroke "white"})))
+        (for [{:keys [desc url file]} files]
+          (d/li {:key url}
+                (d/span {:class "desc"} desc)
+                (d/img {:class "window" :src url :file file})))))
+
 
 (defnc app []
-  (d/div  (d/label {:for "media-file"} "hey")
-          (d/input {:name "media" :id "media-file" :type "file"
-                    :accept "image/*" :capture "enviroment"
-                    :hidden true}
-                   )
-          (d/label {:for "description"} "beey")
-          (d/input {:type "text" :id "description"})
-          (d/button {:id "btn"} "add")))
+  (let [[files-list set-files-list]
+        ^{:doc "each file in files-list is a map with keys:
+  :file - is a File object
+  :url - URL object created by URL.createObjectURL(file) on the associated file object
+  :desc - description
+  :step - index of the step in recipe"} (hooks/use-state (list)) ;files-state
+        [status set-status] (hooks/use-state :add) ;status-state
+        [total set-total] (hooks/use-state 0)
+        switch-to-edit (constantly :edit)]
+    (<>
+     (d/label {:for "media-file"} "حمل صورة")
+         (d/input {:name "media" :id "media-file" :type "file"
+                   :accept "image/*" :capture "enviroment"
+                   :class "sr-only"
+                   ;; :hidden true
+                   :on-change (fn in-event [e]
+                                (do
+                                  (.stopPropagation e)
+                                  (.preventDefault e)
+                                  (let [file-obj (first (.. e -target -files))
+                                        file-url (js/URL.createObjectURL file-obj)]
+                                    (when VERBOSE
+                                      (js/console.log "obj" file-obj
+                                                      "url" file-url))
+                                    (case status
+                                      :edit 
+                                      (when-let [top-image (peek files-list)]
+                                        (when VERBOSE
+                                          (js/console.log "editing image"))
+                                        (when-let [url (get top-image :url)]
+                                          (js/URL.revokeObjectURL url))
+                                        (set-files-list pop)
+                                        (set-files-list conj (assoc top-image
+                                                                    :file file-obj
+                                                                    :url file-url)))
+                                      :add (do
+                                             (when VERBOSE
+                                               (js/console.log "adding image"))
+                                             (set-total inc)
+                                             (set-files-list conj {:file file-obj
+                                                                   :url file-url
+                                                                   :step total})
+                                             (set-status switch-to-edit))))
+                                  
+                                  ))})
+         (d/label {:for "description"} "اكتب الخطوة")
+         (d/input {:type "text" :id "description"
+                   :on-change #(do
+                                 (when-let [desc (.. % -target -value)]
+                                   (case status
+                                     :edit (when-let [top-image (peek files-list)]
+                                             (when VERBOSE
+                                               (js/console.log "edit description"))
+                                             (set-files-list pop)
+                                             (set-files-list conj (assoc top-image
+                                                                         :desc desc)))
+                                     :add (do
+                                            (when VERBOSE
+                                              (js/console.log "add description"))
+                                            (set-total inc)
+                                            (set-files-list conj {:desc desc
+                                                                  :step total})
+                                            
+                                            (set-status switch-to-edit)))))})
+         (d/button {:id "add-picture"
+                    :on-click #(do
+                                 (let [top-image (peek files-list)]
+                                   (when (and (contains? top-image :file)
+                                              (contains? top-image :desc)
+                                              (contains? top-image :url))
+                                     (set! (js/document.getElementById "description") -value "")
+                                     (set-status (constantly :add)))))}
+                   "اضف صورة جديدة")
+         (d/button {:id "upload"
+                    :on-click #(do
+                                 (js/console.log "uploadding !!!!!")
+                                 (go (doseq [{:keys [file desc step]
+                                              obj-url :url} files-list]
+                                       (let [response (<! (http/get "/api/v1/getUrl"))
+                                             url (get-in response [:body :url])
+                                             response (<! (http/post url {:multipart-params [["media" file]]}))]
+                                         (when VERBOSE
+                                           (js/console.log "upload to " url)
+                                           (js/console.log "file " file
+                                                           "description " desc))
+                                         (prn response)
+                                         (js/console.dir "res " response)
+                                         (if (:success response)
+                                           (do (js/URL.revokeObjectURL obj-url)
+                                               (let [response (<! (http/post (str "/api/v1/recipe/" recipe-id)
+                                                                             {:edn-params {:step step
+                                                                                             :description desc :url url :media-type "img"}}))]
+                                                 (js/console.log response)))
+                                           ;; else
+                                           (do
+                                             (js/console.log "could not upload image!!")))
+                                         ))
+                                     (set-files-list (constantly (list)))
+                                     (set-status (constantly :add))
+                                     ))}
+                   "انشر الصور")
+         (d/button {:id "logging"
+                    :on-click #(do
+                                 (js/console.log "shoudl be uploading files")
+                                 (js/console.log status)
+                                 (js/console.dir files-list))
+                    } "console log")
+         ($ preview-list {:files files-list :more? (= status :add)}))))
 
 (defonce root (rdom/createRoot (js/document.getElementById "app")))
 (defn ^:dev/after-load start []
@@ -51,7 +179,12 @@
     (js/console.log "stop you"))
   ;; (.removeEventListener btn "click" upload-image!)
   (when VERBOSE
-    (js/console.log "removed events...")))
+    (js/console.log "removing events and urls...")
+    #_(doseq [{:keys [url]} @file-list]
+      (js/console.log "removeing" url)
+      #_(js/URL.revokeObjectURL url)))
+  
+  )
 (defn init []
   (when VERBOSE
     (js/console.log "yeah baby I'm init!"))

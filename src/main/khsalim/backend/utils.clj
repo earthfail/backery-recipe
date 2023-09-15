@@ -30,7 +30,7 @@
                '[clojure.inspector :as insp]
                '[clojure.pprint :as pp]
                '[clojure.repl :as repl])
-      (jdoc/add-remote-javadoc "org.eclipse.jetty.server" "https://www.eclipse.org/jetty/javadoc/jetty-9/")
+      #_(jdoc/add-remote-javadoc "org.eclipse.jetty.server" "https://www.eclipse.org/jetty/javadoc/jetty-9/")
       :required)
 
 (defn wrap-jwt-authentication

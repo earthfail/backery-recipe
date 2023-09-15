@@ -7,6 +7,7 @@
   com.zaxxer/HikariCP {:mvn/version "5.0.1"
                        :me/about "connection pool"}
   org.postgresql/postgresql {:mvn/version "42.2.10"}
+  org.xerial/sqlite-jdbc {:mvn/version "3.42.0.0"}
   clj-http/clj-http {:mvn/version "3.12.3"
                      :me/about "http client"
                      :me/url "https://github.com/dakrone/clj-http"}
@@ -24,6 +25,7 @@
                                   :me/url "https://github.com/sunng87/ring-jetty9-adapter"}
   ring/ring-core {:mvn/version "1.9.6"}
   ring/ring-defaults {:mvn/version "0.3.4"}
+  ring-cors/ring-cors {:mvn/version "0.1.13"}
   ring/ring-anti-forgery {:mvn/version "1.3.0"}
 
   metosin/reitit {:mvn/version "0.5.18"

@@ -42,10 +42,18 @@
 (defn get-user-recipes [ds user-id]
   (jdbc/execute! ds ["SELECT \"recipe-id\",name,description FROM \"users-recipes\" WHERE \"user-id\"=?" user-id]
                  {:builder-fn rs/as-unqualified-lower-maps}))
-
+(defn associate-user-recipe [ds user-id recipe-id]
+  (jdbc/execute!
+   ds
+   ["INSERT INTO \"users-recipes\" (\"user-id\",\"recipe-id\") VALUES (?,?)" user-id recipe-id]))
+(defn insert-recipe-step [ds [recipe-id step description media media-type :as recipe-steps]]
+  (jdbc/execute!
+   ds
+   (into ["INSERT INTO \"recipes-steps\" (\"recipe-id\",step,description,media,\"media-type\") VALUES (?,?,?,?,?)"]
+         recipe-steps)))
 (comment
   ;; next.jdbc
-
+  (rand-int 100000)
   (def ds2 (jdbc/get-datasource db-lite))
 
   ;; (jdbc/execute! ds2 ["insert into users(name) values(\"salim\"),(\"mariam\")"])
@@ -61,7 +69,7 @@
   (insert-refresh-token ds ["abc" 37])
 
   (jdbc/execute! ds ["SELECT * from users where id= :id" {"id" 1}])
-  
+
   :rfc)
 
 (comment
