@@ -26,6 +26,9 @@
    [reitit.ring.middleware.parameters :refer [parameters-middleware]]
    
    [reitit.ring.middleware.multipart :refer [multipart-middleware]]
+
+   [ring.middleware.cors :refer [wrap-cors]]
+
    [selmer.parser :as selmer]
    [clojure.java.io :as io]))
 ;; (filter #(clojure.string/starts-with? (second %) "image") mime-type/default-mime-types)
@@ -46,7 +49,13 @@
   ;;(jdoc/add-remote-javadoc "org.eclipse.jetty.server" "https://www.eclipse.org/jetty/javadoc/jetty-9/")
   :required)
 
-
+(def cors-middleware
+  {:name ::cors
+   :wrap #_wrap-cors
+   (fn my-wrap-cors [h]
+     (wrap-cors h
+                :access-control-allow-origin [#"http://localhost:3000" #"http://dwave.local:3000"]
+                :access-control-allow-methods [:get :post]))})
 (def datasource-middleware
   {:name ::datasource
    :wrap (fn datasource-wrap [handler]
@@ -115,12 +124,16 @@
             {:status 400 :body message})))
       {:status 400 :body "email or password messing. must be in a form urlencoded to login"})))
 
-(defn recipe [{{:keys [recipe-id]} :path-params}]
+(defn recipe [{ds :ds
+               {:keys [recipe-id]} :path-params}]
   (let [recipe-id (try (Integer/parseInt recipe-id)
                        (catch Exception _ (db/log-message (str "recipe-id is not Integer it is " recipe-id)) 0))]
     (rur/response
      (selmer/render-file "recipe.html"
-                         (get-in @db-dev [::db/recipes recipe-id])))))
+                         {:recipe-id recipe-id
+                          :recipes (db/get-recipe-steps ds recipe-id)}))))
+(db/get-recipe-steps db/ds 20674)
+
 (defn make-recipe [{ds :ds
                     {:keys [id]} :identity}]
   (let [recipe-id (rand-int 100000)]
@@ -131,7 +144,7 @@
   (let [url (random-uuid)]
     (println url)
     (swap! db-dev update ::db/urls conj {:url url :date (java.util.Date.)})
-    (rur/response {:url (str "http://localhost:3000/api/v1/img/" url)})))
+    (rur/response {:url (str "/api/v1/img/" url)}))) ; http://localhost:3000
 (defn get-img-url [{{:keys [url]} :path-params}]
     (println "asked for url:" url)
   (rur/file-response (str vault-path "/" url)))
@@ -188,19 +201,27 @@
       ;;else
       (rur/bad-request {:message "bad request to get token"
                         :success false}))))
+(defn register-recipe [{ds :ds
+                        {:keys [id]} :identity
+                        {:keys [recipe-id]} :path-params
+                        {:keys [recipe-name recipe-description]} :body-params}]
+  (db/register-recipe-data ds id recipe-id recipe-name recipe-description)
+  (rur/response (str "added recipe data " id recipe-id recipe-name recipe-description)))
 (defn upload-recipe [{ds :ds
                       {:keys [id]} :identity
                       {:keys [recipe-id]} :path-params,
-                      {:keys [step description url media-type]} :body-params :as req}]
+                      {:keys [step description url media-type]} :body-params}]
   ;; (println "req recipe" req)
   (db/insert-recipe-step ds [recipe-id step description url media-type])
 
   (rur/response [recipe-id " test " step description url media-type]))
 (defn echo [_]
-  (rur/response
-   (selmer/render-file "signup.html" {:refresh-token "abc"
-                                      :name "seeeso"}))
-  #_{:status 200, :body (str "salim khatib (me)" (java.util.Date.))})
+  #_(rur/response
+     (selmer/render-file "signup.html" {:refresh-token "abc"
+                                        :name "seeeso"}))
+  (rur/header
+   {:status 200, :body (str "salim khatib (me)" (java.util.Date.))}
+   :access-control-allow-credentials true))
 
 (defn static-routes []
   [["/" {:name ::root
@@ -218,22 +239,25 @@
     ["css/*" (ring/create-file-handler {:root "public/css"})]]])
 (defn api-routes []
   [["/api"
-    ["/v1"
+    ["/v1" {:middleware [cors-middleware]}
      ["/recipe/:recipe-id" {:name ::order
                             :muuntaja m/instance
-                            :middleware [#_wrap-jwt-authentication
-                                         #_auth-middleware
-                                         #_format-middleware
-                                         #_[echo-middleware "order"]]
-                            :get customer-form
+                            :middleware [datasource-middleware
+                                         wrap-cookies
+                                         [cookie-header-middleware jwt-cookie-name]
+                                         format-middleware
+                                         parameters-middleware
+                                         ]
+                            ;:middleware
+                            ;; [#_wrap-jwt-authentication
+                            ;;  #_auth-middleware
+                            ;;  #_format-middleware
+                            ;;  #_[echo-middleware "order"]]
+                            ;; :get customer-form
+                            :patch {:handler register-recipe
+                                    :middleware [[echo-middleware "patch recipe"]]}
                             :post {:handler upload-recipe
-                                   :muuntaja m/instance
-                                   :middleware [datasource-middleware
-                                                wrap-cookies
-                                                [cookie-header-middleware jwt-cookie-name]
-                                                format-middleware
-                                                parameters-middleware
-                                                [echo-middleware "post recipe"]]}}]
+                                   :middleware [[echo-middleware "post recipe"]]}}]
      ["/getUrl" {;:name ::order
                                         ;:middleware [wrap-jwt-authentication auth-middleware]
                  :muuntaja m/instance
@@ -280,6 +304,7 @@
                                 [cookie-header-middleware jwt-cookie-name]
                                 [echo-middleware "daaaashboarrrrrd!"]]}]
     ["/recipes/cook/:recipe-id" {:name ::recipe
+                                 :middleware [datasource-middleware]
                                  :get recipe}]
     ["/recipes/make" {:name ::make
                       :middleware [datasource-middleware
@@ -288,13 +313,17 @@
                       :get make-recipe}]
     ["/echo" {:name ::echo
               ;; :middleware [[cookie-header-middleware "user_jwt"] wrap-jwt-authentication auth-middleware] ; old
-              :parameters {:multipart [:map [:file malli/temp-file-part]]}
-              :middleware [datasource-middleware
-                           wrap-cookies
-                           parameters-middleware
-                           multipart-middleware
-                           [echo-middleware "echo"]]
-              :muuntaja m/instance
+
+              ;; :parameters {:multipart [:map [:file malli/temp-file-part]]}
+              ;; :middleware [datasource-middleware
+              ;;              wrap-cookies
+              ;;              parameters-middleware
+              ;;              multipart-middleware
+              ;;              [echo-middleware "echo"]]
+              ;; :muuntaja m/instance
+
+              :middleware [cors-middleware
+                           [echo-middleware "echoing"]]
               :get echo
               :post echo}]
     (api-routes)]
@@ -351,6 +380,16 @@
   tmp
   res
 
+  (fn wrap-cors-handler [req]
+    (rur/header req :access-control-allow-credentials true)
+    (wrap-cors h
+               :access-control-allow-origin [#"http://localhost:3000" #"http://dwave.local:3000"]
+               :access-control-allow-methods [:get :post]))
+  ((wrap-cors identity
+              :access-control-allow-origin [#"http://localhost:3000" #"http://dwave.local:3000"]
+              :access-control-allow-methods [:get :post])
+   {:request-method :get :uri "/echo"})
+
   (map (partial ku/insert-link "/recipes/cook/")
        (db/get-user-recipes db/ds 1))
   (let [{:user/keys [id]} {}]
@@ -363,6 +402,9 @@
   (-> tmp
       :params)
   ring.middleware.cookies/cookies-request
+
+  (selmer/known-variables (slurp (io/resource "templates/recipe.html")))
+
   :rfc)
 (comment
   ;; pomegranate

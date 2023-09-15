@@ -29,8 +29,9 @@
 		<div class="carousel-slide h-full flex" data-type="carousel-slide">
 		    {% for recipe in recipes %}
 		    <div class="shrink-0 bg-cover bg-center w-full pt-[50%]"
-			 style="background-image:url('/assets/img/{{recipe.img}}');"
-			 data-type="img">
+			 style="background-image:url('{{recipe.media}}');"
+			 data-type="img"
+			 is="img">
 			<div class="bg-gradient-to-b from-transparent via-10% via-black/60 to-black h-full px-4 py-8">
 			    <span class="text-white px-10 pt-24 block">
 				{{recipe.description}}
@@ -68,7 +69,7 @@
 	    سليم خطيب
 	</footer>
 	<script id="data" type="application/javascript">
-	    {{recipes|json|safe}}
+	    {{recipe-id|json|safe}}
 	</script>
 	<script type="text/javascript" src="/assets/js/recipe.js" async-attr defer-attr></script>
     </body>

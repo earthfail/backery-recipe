@@ -46,6 +46,15 @@
   (jdbc/execute!
    ds
    ["INSERT INTO \"users-recipes\" (\"user-id\",\"recipe-id\") VALUES (?,?)" user-id recipe-id]))
+(defn register-recipe-data [ds user-id recipe-id recipe-name recipe-description]
+  (jdbc/execute! ds [(str "UPDATE \"users-recipes\" "
+                          "SET name=?,description=? "
+                          "WHERE \"user-id\"=? AND \"recipe-id\"=?")
+                     recipe-name recipe-description
+                     user-id recipe-id]))
+(defn get-recipe-steps [ds recipe-id]
+  (jdbc/execute! ds ["SELECT step,description,media,\"media-type\" FROM \"recipes-steps\" WHERE \"recipe-id\"=? ORDER BY step ASC" recipe-id]
+                 {:builder-fn rs/as-unqualified-lower-maps}))
 (defn insert-recipe-step [ds [recipe-id step description media media-type :as recipe-steps]]
   (jdbc/execute!
    ds
@@ -83,7 +92,10 @@
   ;; => "bcrypt+blake2b-512$4953bdb8d25f9df16d364dc55bb0ec5d$10$d51d871f028100cdafeb3dea4e34c346a54013f872e02367"
   :rfc)
 
-(comment 
+(comment
+
+  (get-recipe-steps ds 20674)
+  ;;[{:step 1, :description "ويندوز", :media "/api/v1/img/aaf4c2da-224f-477e-aa75-a699f5f42558", :media-type "img"} {:step 0, :description "قدس", :media "/api/v1/img/7f1f6ca7-62a4-4b14-96ed-47a53fd50b58", :media-type "img"}]
   (defn create-user [email name password]
     (let [hashed-password (derive password {:alg :bcrypt+blake2b-512 :iterations 12})
           created-user {:email email :name name :password hashed-password}]

@@ -14,7 +14,7 @@
       .-text
       js/JSON.parse
       (js->clj :keywordize-keys true)))
-(def current-page (get (read-data!) :page 0))
+(def current-page (read-data!) #_(get (read-data!) :page 0))
 
 ;; could merge with {current-page 0} or check if key is nil when advancing
 ;; I choose the second option

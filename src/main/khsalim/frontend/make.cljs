@@ -62,9 +62,19 @@
   :desc - description
   :step - index of the step in recipe"} (hooks/use-state (list)) ;files-state
         [status set-status] (hooks/use-state :add) ;status-state
+        [name set-name] (hooks/use-state "")
+        [description set-description] (hooks/use-state "")
         [total set-total] (hooks/use-state 0)
         switch-to-edit (constantly :edit)]
     (<>
+     (d/label {:for "recipe-name"} "اسم الوصفة")
+     (d/input {:id "recipe-name" :type "text"
+               :on-change (fn name-event [e]
+                            (set-name (constantly (.. e -target -value))))})
+     (d/label {:for "recipe-description"} "شرح عن الوصفة")
+     (d/input {:id "recipe-description" :type "text"
+               :on-change (fn name-event [e]
+                            (set-description (constantly (.. e -target -value))))})
      (d/label {:for "media-file"} "حمل صورة")
          (d/input {:name "media" :id "media-file" :type "file"
                    :accept "image/*" :capture "enviroment"
@@ -97,9 +107,7 @@
                                              (set-files-list conj {:file file-obj
                                                                    :url file-url
                                                                    :step total})
-                                             (set-status switch-to-edit))))
-                                  
-                                  ))})
+                                             (set-status switch-to-edit))))))})
          (d/label {:for "description"} "اكتب الخطوة")
          (d/input {:type "text" :id "description"
                    :on-change #(do
@@ -131,7 +139,13 @@
          (d/button {:id "upload"
                     :on-click #(do
                                  (js/console.log "uploadding !!!!!")
-                                 (go (doseq [{:keys [file desc step]
+                                 (go
+                                   (if (:success
+                                        (<! (http/patch
+                                             (str "/api/v1/recipe/" recipe-id)
+                                             {:edn-params {:recipe-name name
+                                                           :recipe-description description}})))
+                                     (doseq [{:keys [file desc step]
                                               obj-url :url} files-list]
                                        (let [response (<! (http/get "/api/v1/getUrl"))
                                              url (get-in response [:body :url])
@@ -146,12 +160,15 @@
                                            (do (js/URL.revokeObjectURL obj-url)
                                                (let [response (<! (http/post (str "/api/v1/recipe/" recipe-id)
                                                                              {:edn-params {:step step
-                                                                                             :description desc :url url :media-type "img"}}))]
+                                                                                           :description desc :url url :media-type "img"}}))]
                                                  (js/console.log response)))
                                            ;; else
                                            (do
                                              (js/console.log "could not upload image!!")))
                                          ))
+                                     ;;else
+                                     (do
+                                       (js/console.log "could not register name and description" recipe-id name description)))
                                      (set-files-list (constantly (list)))
                                      (set-status (constantly :add))
                                      ))}
@@ -160,7 +177,9 @@
                     :on-click #(do
                                  (js/console.log "shoudl be uploading files")
                                  (js/console.log status)
-                                 (js/console.dir files-list))
+                                 (js/console.dir files-list)
+                                 (js/console.log name description)
+                                 )
                     } "console log")
          ($ preview-list {:files files-list :more? (= status :add)}))))
 
