@@ -3,19 +3,19 @@
    [clojure.set :refer [map-invert]]
    [khsalim.backend.customer :refer [render-form]]
    [khsalim.backend.utils :as ku :refer [config cookie-header-middleware wrap-jwt-authentication auth-middleware create-token]]
-   [khsalim.backend.db :as db :refer [db-dev]]
-   
+   [khsalim.backend.db :as db :refer [ephemeral-db]]
+
    [clj-http.client :as client]
-   
 
    [reitit.ring.malli :as malli]
 
    [muuntaja.core :as m]
    [reitit.ring :as ring]
    [reitit.core :as rc]
-   
+
    [ring.util.response :as rur]
    [ring.middleware.cookies :refer [wrap-cookies]]
+   [ring.middleware.cors :refer [wrap-cors]]
    ;; [ring.util.mime-type :as mime-type]
    [reitit.ring.middleware.dev]
    [reitit.ring.middleware.exception :refer [exception-middleware]]
@@ -24,10 +24,8 @@
                                             #_format-request-middleware
                                             #_format-response-middleware]]
    [reitit.ring.middleware.parameters :refer [parameters-middleware]]
-   
-   [reitit.ring.middleware.multipart :refer [multipart-middleware]]
 
-   [ring.middleware.cors :refer [wrap-cors]]
+   [reitit.ring.middleware.multipart :refer [multipart-middleware]]
 
    [selmer.parser :as selmer]
    [clojure.java.io :as io]))
@@ -39,7 +37,9 @@
 
 (def dev (get config :dev true))
 (def jwt-cookie-name "JWT_TOKEN")
-(def vault-path (get config :vault "vault"))
+(def vault-path (if dev
+                  "dev/data/vault"
+                  (get config :vault "dev/data/vault")))
 (when dev
   (require '[clojure.java.javadoc :as jdoc]
            '[clojure.reflect :as reflect]
@@ -49,13 +49,15 @@
   ;;(jdoc/add-remote-javadoc "org.eclipse.jetty.server" "https://www.eclipse.org/jetty/javadoc/jetty-9/")
   :required)
 
+(def allow-origin [#"http://localhost:3000" #"http://dwave.local:3000"])
 (def cors-middleware
   {:name ::cors
    :wrap #_wrap-cors
    (fn my-wrap-cors [h]
      (wrap-cors h
-                :access-control-allow-origin [#"http://localhost:3000" #"http://dwave.local:3000"]
-                :access-control-allow-methods [:get :post]))})
+                :access-control-allow-origin allow-origin
+                :access-control-allow-methods [:get :post :delete]
+                :access-control-allow-credentials "true"))})
 (def datasource-middleware
   {:name ::datasource
    :wrap (fn datasource-wrap [handler]
@@ -78,51 +80,7 @@
      (fn [_] (rur/response (selmer/render-file (io/resource (str "pages/" file-name))  context-map)))
      (fn [_] (rur/file-response (str "public/" file-name))))))
 
-(defn customer-form [{{:keys [order-id]} :path-params}]
-  (if-let [info (get @db-dev order-id)]
-    (rur/response (render-form info))
-    ;;else
-    (rur/not-found (str order-id " not found"))))
-(defn confirm-choice [{{:keys [recipe-id]} :path-params
-                       headers :headers
-                       uri :uri
-                       server-name :server-name
-                       server-port :server-port}]
-  (println "headers " headers)
-  (println "order-id " recipe-id)
-  (if (= (get headers "hhh") "jjj")
-    (do
-      (swap! db-dev update recipe-id update :touched inc)
-      (rur/created (str server-name ":" server-port uri) "url made"))
-    (rur/bad-request "bad request")))
-#_(defn add-user [{:keys [params] :as req}]
-  ;; extract user and password
-  (let [email (get params "email")
-        password (get params "password")]
-    (if (and email password)
-      (if (db/get-user-by-email email)
-        {:status 200 :body "email already taken"}
-        {:status 200 :body (str "created user" (db/create-user email (str (gensym "user")) password))})
-      ;else
-      {:status 400 :body "email or password messing. must be in a form urlencoded"})))
-#_(defn confirm-user [{:keys [params] :as req}]
-  (let [email (get params "email")
-        password (get params "password")]
-    (if (and email password)
-      (let [{:keys [valid update message] :or {valid false}}
-            (db/get-user-by-credentials email password)]
-        (if valid
-          (if update
-            (rur/header (rur/redirect "/" :see-other)
-                        "message" "password needs updating")
-            {:status 200 :body "everything is okay"
-             :cookies {jwt-cookie-name {:value (create-token {:email email :id 1})
-                                        :same-site :lax :domain (:uri req)}}})
-          ;else
-          (do
-            (println "I'm here")
-            {:status 400 :body message})))
-      {:status 400 :body "email or password messing. must be in a form urlencoded to login"})))
+
 
 (defn recipe [{ds :ds
                {:keys [recipe-id]} :path-params}]
@@ -132,21 +90,21 @@
      (selmer/render-file "recipe.html"
                          {:recipe-id recipe-id
                           :recipes (db/get-recipe-steps ds recipe-id)}))))
-(db/get-recipe-steps db/ds 20674)
 
 (defn make-recipe [{ds :ds
                     {:keys [id]} :identity}]
   (let [recipe-id (rand-int 100000)]
-    (db/associate-user-recipe ds id recipe-id)
+    #_(db/insert-user-recipe ds id recipe-id)
     (rur/response (selmer/render-file "make.html" {:recipe-id recipe-id}))))
 
 (defn generate-img-url [_]
   (let [url (random-uuid)]
     (println url)
-    (swap! db-dev update ::db/urls conj {:url url :date (java.util.Date.)})
-    (rur/response {:url (str "/api/v1/img/" url)}))) ; http://localhost:3000
+    (swap! ephemeral-db update ::db/urls conj {:url url :date (java.util.Date.)})
+    (rur/response {:url (str "http://localhost:3000/api/v1/img/" url)})
+    #_(rur/response {:url (str "/api/v1/img/" url)}))) ; http://localhost:3000
 (defn get-img-url [{{:keys [url]} :path-params}]
-    (println "asked for url:" url)
+  (println "asked for url:" url)
   (rur/file-response (str vault-path "/" url)))
 (defn post-img-url [{{:keys [url]} :path-params ,
                      {:strs [media]} :multipart-params}]
@@ -157,7 +115,6 @@
       (rur/created (str "/api/v1/img/" file-name)))
     ;;else
     (rur/bad-request "file type not supported")))
-
 
 (defn dashboard [{{:keys [id name avatar-url]} :identity
                   ds :ds}]
@@ -201,6 +158,13 @@
       ;;else
       (rur/bad-request {:message "bad request to get token"
                         :success false}))))
+(defn register-recipe-finished [{ds :ds
+                                 {:keys [recipe-id status]} :body-params}]
+  (if (not= :finished status)
+    (rur/bad-request (str "not finished" recipe-id " got " status))
+    (if (db/register-recipe-statistic ds recipe-id)
+      (rur/response "added statistic")
+      (rur/status (rur/response "sorry didn't succeed") 502))))
 (defn register-recipe [{ds :ds
                         {:keys [id]} :identity
                         {:keys [recipe-id]} :path-params
@@ -215,13 +179,18 @@
   (db/insert-recipe-step ds [recipe-id step description url media-type])
 
   (rur/response [recipe-id " test " step description url media-type]))
+(defn delete-recipe [{ds :ds
+                     {:keys [id]} :identity
+                     {:keys [recipe-id]} :path-params}]
+  (if (< 0 (get (first (db/delete-recipe ds id recipe-id)) :next.jdbc/update-count))
+    (rur/response "deleted!!")
+    (rur/status (rur/response "resource gone") 405)))
+
 (defn echo [_]
   #_(rur/response
      (selmer/render-file "signup.html" {:refresh-token "abc"
                                         :name "seeeso"}))
-  (rur/header
-   {:status 200, :body (str "salim khatib (me)" (java.util.Date.))}
-   :access-control-allow-credentials true))
+  {:status 200, :body (str "salim khatib (me)" (java.util.Date.))})
 
 (defn static-routes []
   [["/" {:name ::root
@@ -231,8 +200,9 @@
     {:name ::landing
      :get (static-file "index.html" {:client-id (get-in config [:github :client-id])
                                      :redirect-uri (get-in config [:github :redirect-uri])})}]
-   ["/tmp.html" (static-file "tmp.html" {:client-id (get-in config [:github :client-id])
-                                         :redirect-uri (get-in config [:github :redirect-uri])})]
+   (when dev
+     ["/tmp.html" (static-file "tmp.html" {:client-id (get-in config [:github :client-id])
+                                           :redirect-uri (get-in config [:github :redirect-uri])})])
    ["/assets/"
     ["img/*"  (ring/create-resource-handler {:root "img"})]
     ["js/*"  (ring/create-file-handler {:root "public/js"})]
@@ -246,8 +216,7 @@
                                          wrap-cookies
                                          [cookie-header-middleware jwt-cookie-name]
                                          format-middleware
-                                         parameters-middleware
-                                         ]
+                                         parameters-middleware]
                             ;:middleware
                             ;; [#_wrap-jwt-authentication
                             ;;  #_auth-middleware
@@ -257,8 +226,11 @@
                             :patch {:handler register-recipe
                                     :middleware [[echo-middleware "patch recipe"]]}
                             :post {:handler upload-recipe
-                                   :middleware [[echo-middleware "post recipe"]]}}]
-     ["/getUrl" {;:name ::order
+                                   :middleware [[echo-middleware "post recipe"]]}
+                            :delete {:handler delete-recipe
+                                     :middleware [[echo-middleware "delete recipe"]]}}]
+     ["/statistic" {:post register-recipe-finished}] ;; recipe.cljs
+     ["/getUrl" {                       ;:name ::order
                                         ;:middleware [wrap-jwt-authentication auth-middleware]
                  :muuntaja m/instance
                  :middleware [format-middleware]
@@ -311,7 +283,8 @@
                                    wrap-cookies
                                    [cookie-header-middleware jwt-cookie-name]]
                       :get make-recipe}]
-    ["/echo" {:name ::echo
+    (when dev
+      ["/echo" {:name ::echo
               ;; :middleware [[cookie-header-middleware "user_jwt"] wrap-jwt-authentication auth-middleware] ; old
 
               ;; :parameters {:multipart [:map [:file malli/temp-file-part]]}
@@ -322,10 +295,15 @@
               ;;              [echo-middleware "echo"]]
               ;; :muuntaja m/instance
 
-              :middleware [cors-middleware
-                           [echo-middleware "echoing"]]
-              :get echo
-              :post echo}]
+                :middleware [;cors-middleware
+                             [wrap-cors
+                              :access-control-allow-credentials true
+                              :access-control-allow-origin #"http://localhost:3000"
+                              :access-control-allow-methods [:get]
+                              :access-control-expose-headers "Etag"]
+                             [echo-middleware "echoing"]]
+                :get echo
+                :post echo}])
     (api-routes)]
    #_{:reitit.middleware/transform reitit.ring.middleware.dev/print-request-diffs}
    #_{:data {:muuntaja m/instance
@@ -355,7 +333,9 @@
 (def app
   (ring/ring-handler
    ;; ring/router the value
-   (dev-router @#'router-gen)
+   (if dev
+     (dev-router @#'router-gen)
+     prod-router)
    ;; (router-gen)
    (ring/routes
     #_(ring/redirect-trailing-slash-handler)
@@ -372,6 +352,8 @@
   (app {:request-method :get :uri "/api/v1/getUrl"})
   (app {:request-method :get :uri "/assets/img/test1.jpg"})
   (app {:request-method :get :uri "/signup" :query-string "d34fe88648147f014edb"})
+
+  (app {:request-method :get :uri "/echo" :headers {"origin" "http://localhost:3000"}})
   ((ring/create-resource-handler {:root "img"
                                   :path "/"}) {:uri "/food.jpg"})
   (rur/resource-response "food.jpg" {:root "img"})
@@ -385,6 +367,24 @@
     (wrap-cors h
                :access-control-allow-origin [#"http://localhost:3000" #"http://dwave.local:3000"]
                :access-control-allow-methods [:get :post]))
+
+  (app {:request-method :get :uri "/echo"})
+
+  ((wrap-cors (fn [_] {:status 200})
+              :access-control-allow-credentials "true"
+              :access-control-allow-origin #".*"
+              :access-control-allow-methods [:get]
+              :access-control-expose-headers "Etag")
+   {:request-method :get
+    :uri "/"
+    :headers {"origin" "http://example.com"}})
+  ((wrap-cors ((:wrap echo-middleware) echo "kkk")
+              :access-control-allow-credentials true
+              :access-control-allow-origin #".*"
+              :access-control-allow-methods [:get]
+              :access-control-expose-headers "Etag")
+   {:request-method :get :uri "/" :headers {"origin" "http://example.com"}})
+
   ((wrap-cors identity
               :access-control-allow-origin [#"http://localhost:3000" #"http://dwave.local:3000"]
               :access-control-allow-methods [:get :post])
@@ -415,8 +415,38 @@
                                              {"clojars" "https://clojars.org/repo"}))
   (require '[clj-http.client :as client])
   (client/post "https://github.com/login/oauth/access_token" {:accept :json
-                                             :form-params {:client_id "1"
-                                                           :client_secret "2"
-                                                           :code "a"
-                                                           :as :json}})
+                                                              :form-params {:client_id "1"
+                                                                            :client_secret "2"
+                                                                            :code "a"
+                                                                            :as :json}})
   :rfc)
+(comment
+  #_(defn add-user [{:keys [params] :as req}]
+  ;; extract user and password
+    (let [email (get params "email")
+          password (get params "password")]
+      (if (and email password)
+        (if (db/get-user-by-email email)
+          {:status 200 :body "email already taken"}
+          {:status 200 :body (str "created user" (db/create-user email (str (gensym "user")) password))})
+      ;else
+        {:status 400 :body "email or password messing. must be in a form urlencoded"})))
+#_(defn confirm-user [{:keys [params] :as req}]
+    (let [email (get params "email")
+          password (get params "password")]
+      (if (and email password)
+        (let [{:keys [valid update message] :or {valid false}}
+              (db/get-user-by-credentials email password)]
+          (if valid
+            (if update
+              (rur/header (rur/redirect "/" :see-other)
+                          "message" "password needs updating")
+              {:status 200 :body "everything is okay"
+               :cookies {jwt-cookie-name {:value (create-token {:email email :id 1})
+                                          :same-site :lax :domain (:uri req)}}})
+          ;else
+            (do
+              (println "I'm here")
+              {:status 400 :body message})))
+        {:status 400 :body "email or password messing. must be in a form urlencoded to login"})))
+)

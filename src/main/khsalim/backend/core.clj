@@ -1,8 +1,8 @@
 (ns khsalim.backend.core
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [khsalim.backend.server :as server])
   (:gen-class))
 
 (defn -main []
-  (println (slurp (io/resource "input.css")))
-  (println "register" (slurp (io/resource "register.html")))
+  (server/start-prod)
   (println "working.....zzz"))

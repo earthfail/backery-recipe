@@ -19,14 +19,17 @@
                               :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}
                    :modules {:recipe {:init-fn khsalim.frontend.recipe/init}}}
           :make {:target :browser
-                   :output-dir "public/js"
-                   :asset-path "/assets/js"
-                   :devtools {:watch-dir "public"
-                              :before-load khsalim.frontend.make/stop
-                              :after-load khsalim.frontend.make/start
-                              :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}
-                   :modules {:make {:init-fn khsalim.frontend.make/init}}}}
- :dev-http {5003 "public"}
+                 :output-dir "public/js"
+                 :asset-path "/assets/js"
+                 :devtools {:watch-dir "public"
+                            :before-load khsalim.frontend.make/stop
+                            :after-load khsalim.frontend.make/start
+                            :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}
+                 :modules {:make {:init-fn khsalim.frontend.make/init}}}}
+ :dev-http {5003
+            ;; "public"
+            {:root "public"
+             :handler khsalim.backend.routers/app}}
  :nrepl {:port 3333}}
 
 #_{:source-paths

@@ -2,7 +2,6 @@
   (:gen-class)
   (:require
    [khsalim.backend.routers :as krouters :refer [app]]
-   
    ;; [org.httpkit.server :refer [run-server server-stop!]]
    ;; [ring.adapter.jetty :as jetty]
    [clojure.java.io :as io]
@@ -14,10 +13,10 @@
 
 
 (def service-map
-  {:port 3000
+  {:port 80
    :legacy-return-value? false
    :join? false
-   :ssl? true :ssl-port 3443
+   :ssl? true :ssl-port 443
    :h2? true :hc2? true
    :keystore  (.getFile (io/resource "keystore/adapterjetty9/my-keystore.jks")) :key-password "password" :keystore-type "PKCS12"
    :truststore (.getFile (io/resource "keystore/adapterjetty9/my-truststore.jks")) :trust-password "password" :truststore-type "PKCS12"
@@ -33,7 +32,10 @@
           (jetty/run-jetty #'app dev-service-map))
   ;; to stop run (.stop server)
   (println "jetty server running in port 3000"))
-
+(defn start-prod []
+  (reset! server
+          (jetty/run-jetty #'app))
+  (println "config " service-map))
 
 (comment
   

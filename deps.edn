@@ -72,10 +72,9 @@
                  selmer/selmer {:mvn/version "1.12.55"
                                 :me/url "https://github.com/yogthos/Selmer"
                                 :me/about "html template library"}}
+          :paths ["resources"]
           :ns-default build}
-  :rebel {:extra-deps {com.bhauman/rebel-readline {:mvn/version "0.1.4"}
-                       com.h2database/h2 {:mvn/version "1.4.199"}}
-          :main-opts  ["-m" "rebel-readline.main"]}
+  :spec {org.clojure/core.specs.alpha {:mvn/version "0.2.62"}}
   :test/db {:extra-deps {com.h2database/h2 {:mvn/version "1.4.199"}
                          org.xerial/sqlite-jdbc {:mvn/version "3.42.0.0"}}}
   :test/deps {:extra-deps {clj-commons/pomegranate {:mvn/version "1.2.23"}
@@ -86,7 +85,7 @@
   :test/ringjetty {:extra-deps {ring/ring-jetty-adapter {:mvn/version "1.9.6"}}}
   :test/http2 {:extra-deps {info.sunng/ring-jetty9-adapter {:mvn/version "0.22.1"
                                                             :me/url "https://github.com/sunng87/ring-jetty9-adapter"}}}
-  :nrepl/rebel
+  :rebel
   {:extra-deps {nrepl/nrepl                {:mvn/version "1.0.0"}
                 cider/cider-nrepl          {:mvn/version "0.31.0"}
                 com.bhauman/rebel-readline {:mvn/version "0.1.4"}}

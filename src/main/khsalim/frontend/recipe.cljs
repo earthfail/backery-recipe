@@ -1,10 +1,9 @@
 (ns khsalim.frontend.recipe
-  ;; (:require [helix.core :refer [defnc $]]
-  ;;           [helix.hooks :as hooks]
-  ;;           [helix.dom :as d]
-  ;;           ["react-dom/client" :as rdom])
-  (:require [clojure.edn :as edn])
-  )
+  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require
+   [cljs-http.client :as http]
+   [cljs.core.async :refer [<!]]
+   [clojure.edn :as edn]))
 ;; NOTE: could benifit from agents and add-watch function `https://clojuredocs.org/clojure.core/add-watch`
 (goog-define VERBOSE true)
 
@@ -22,7 +21,7 @@
                        pages
                        {current-page 0})))
 (defonce counter (atom (get @pages current-page 0)))
-
+(defonce finished (atom false))
 (def carouselSlide (js/document.querySelector "[data-type=\"carousel-slide\"]"))
 (def carouselImages (into [] (js/document.querySelectorAll "[data-type=\"img\"]")))
 
@@ -36,7 +35,9 @@
     (when (< @counter (dec (count carouselImages)))
       (swap! counter inc)
       (if (= @counter (dec (count carouselImages)))
-        (swap! pages dissoc current-page)
+        (do (swap! pages dissoc current-page)
+            (go (<! (http/post "/api/v1/statistic" {:edn-params {:recipe-id recipe-id
+                                                                 :status :finished}}))))
         (swap! pages update current-page (fnil inc 0)))
       (js/localStorage.setItem "pages" (prn-str @pages)))
     (when VERBOSE
