@@ -66,9 +66,11 @@
     (catch Exception e (log-message "add recipe" (.getMessage e)))))
 (defn register-recipe-data [ds user-id recipe-id recipe-name recipe-description]
   (try
-    (jdbc/execute! ds [(str "UPDATE \"users-recipes\" "
-                            "SET name=?,description=?,last_modified=datetime() "
-                            "WHERE \"user-id\"=? AND \"recipe-id\"=?")
+    (jdbc/execute! ds [(str "INSERT INTO \"users-recipes\" "
+                            "(\"user-id\",\"recipe-id\",description,name,last_modified)"
+                            "VALUES(?,?,?,?,datetime()"
+                            "ON CONFLICT DO "
+                            "UPDATE SET description=excluded.description,name=excluded.name")
                        recipe-name recipe-description
                        user-id recipe-id])
     (catch Exception e (log-message "register-recipe-data" (.getMessage e)))))

@@ -4,5 +4,6 @@
   (:gen-class))
 
 (defn -main []
+  (println "starting server")
   (server/start-prod)
   (println "working.....zzz"))

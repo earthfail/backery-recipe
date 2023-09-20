@@ -12,7 +12,7 @@
    )
   ;; (:require [clojure.edn :as edn])
   )
-(goog-define VERBOSE true)
+(goog-define VERBOSE false)
 
 ;; https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
 ;; https://developer.mozilla.org/en-US/docs/Web/API/File_API/Using_files_from_web_applications

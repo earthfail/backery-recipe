@@ -34,7 +34,7 @@
   (println "jetty server running in port 3000"))
 (defn start-prod []
   (reset! server
-          (jetty/run-jetty #'app))
+          (jetty/run-jetty #'app dev-service-map))
   (println "config " service-map))
 
 (comment

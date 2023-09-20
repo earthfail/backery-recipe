@@ -5,7 +5,7 @@
    [cljs.core.async :refer [<!]]
    [clojure.edn :as edn]))
 ;; NOTE: could benifit from agents and add-watch function `https://clojuredocs.org/clojure.core/add-watch`
-(goog-define VERBOSE true)
+(goog-define VERBOSE false)
 
 (defn read-data! []
   (-> js/document
@@ -36,7 +36,7 @@
       (swap! counter inc)
       (if (= @counter (dec (count carouselImages)))
         (do (swap! pages dissoc current-page)
-            (go (<! (http/post "/api/v1/statistic" {:edn-params {:recipe-id recipe-id
+            (go (<! (http/post "/api/v1/statistic" {:edn-params {:recipe-id current-page
                                                                  :status :finished}}))))
         (swap! pages update current-page (fnil inc 0)))
       (js/localStorage.setItem "pages" (prn-str @pages)))

@@ -17,7 +17,8 @@
                               :before-load khsalim.frontend.recipe/stop
                               :after-load khsalim.frontend.recipe/start
                               :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}
-                   :modules {:recipe {:init-fn khsalim.frontend.recipe/init}}}
+                   :modules {:recipe {:init-fn khsalim.frontend.recipe/init}}
+                   :dev {:closure-defines {khsalim.frontend.recipe/VERBOSE true}}}
           :make {:target :browser
                  :output-dir "public/js"
                  :asset-path "/assets/js"
@@ -25,7 +26,9 @@
                             :before-load khsalim.frontend.make/stop
                             :after-load khsalim.frontend.make/start
                             :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}
-                 :modules {:make {:init-fn khsalim.frontend.make/init}}}}
+                 :modules {:make {:init-fn khsalim.frontend.make/init}}
+                 :dev {:closure-defines {khsalim.frontend.make/VERBOSE true}}
+                 }}
  :dev-http {5003
             ;; "public"
             {:root "public"

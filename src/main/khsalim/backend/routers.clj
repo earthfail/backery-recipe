@@ -333,9 +333,12 @@
 (def app
   (ring/ring-handler
    ;; ring/router the value
-   (if dev
-     (dev-router @#'router-gen)
-     prod-router)
+   ;; (if dev
+   ;;   (dev-router @#'router-gen)
+   ;;   prod-router)
+   (dev-router (if dev
+                 @#'router-gen
+                 prod-router))
    ;; (router-gen)
    (ring/routes
     #_(ring/redirect-trailing-slash-handler)
