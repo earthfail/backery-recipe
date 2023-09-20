@@ -7,8 +7,7 @@ CREATE TABLE users (
 	refresh_token TEXT,
 	authorization_server TEXT,
 	authorization_server_refresh_token TEXT,
-	asrt_expire_date TEXT,
-	rt_expire_date TEXT
-);
+	asrt_expire_date TEXT
+, rt_expire_date TEXT, avatar_url TEXT, last_modified TEXT);
 
 CREATE UNIQUE INDEX users_email_IDX ON users (email);
