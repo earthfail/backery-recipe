@@ -69,22 +69,22 @@
 
                  asset-minifier/asset-minifier {:mvn/version "0.2.7"
                                                 :me/url "https://github.com/yogthos/asset-minifier"}
+                 aero/aero {:mvn/version "1.1.6"
+                            :me/url "https://github.com/juxt/aero"
+                            :me/about "enviroment variables"
+                            environ/environ {:mvn/version "1.2.0"
+                                             :me/url "https://github.com/weavejester/environ"
+                                             :me/about "enviroment variables"}}
                  selmer/selmer {:mvn/version "1.12.55"
                                 :me/url "https://github.com/yogthos/Selmer"
                                 :me/about "html template library"}}
           :paths ["resources"]
           :ns-default build}
-  :spec {org.clojure/core.specs.alpha {:mvn/version "0.2.62"}}
   :test/db {:extra-deps {com.h2database/h2 {:mvn/version "1.4.199"}
                          org.xerial/sqlite-jdbc {:mvn/version "3.42.0.0"}}}
   :test/deps {:extra-deps {clj-commons/pomegranate {:mvn/version "1.2.23"}
                            ring/ring-mock {:mvn/version "0.4.0"}}}
-  :test/httpkit {:extra-deps {http-kit/http-kit {:mvn/version "2.6.0"
-                                                 :me/about "html server"
-                                                 :me/url "https://github.com/http-kit/http-kit"}}}
-  :test/ringjetty {:extra-deps {ring/ring-jetty-adapter {:mvn/version "1.9.6"}}}
-  :test/http2 {:extra-deps {info.sunng/ring-jetty9-adapter {:mvn/version "0.22.1"
-                                                            :me/url "https://github.com/sunng87/ring-jetty9-adapter"}}}
+
   :rebel
   {:extra-deps {nrepl/nrepl                {:mvn/version "1.0.0"}
                 cider/cider-nrepl          {:mvn/version "0.31.0"}
@@ -94,7 +94,12 @@
                 "--middleware" "[cider.nrepl/cider-middleware]"
                 "--interactive"
                 "-f" "rebel-readline.main/-main"]}
-
+  :test/httpkit {:extra-deps {http-kit/http-kit {:mvn/version "2.6.0"
+                                                 :me/about "html server"
+                                                 :me/url "https://github.com/http-kit/http-kit"}}}
+  :test/ringjetty {:extra-deps {ring/ring-jetty-adapter {:mvn/version "1.9.6"}}}
+  :test/http2 {:extra-deps {info.sunng/ring-jetty9-adapter {:mvn/version "0.22.1"
+                                                            :me/url "https://github.com/sunng87/ring-jetty9-adapter"}}}
   :cider-clj {:me/url "https://docs.cider.mx/cider/basics/middleware_setup.html#using-tools-deps"
               :extra-deps {cider/cider-nrepl {:mvn/version "0.31.0"}}
               :main-opts ["-m" "nrepl.cmdline" "--middleware" "[cider.nrepl/cider-middleware]"]}

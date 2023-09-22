@@ -8,7 +8,7 @@
 ;; https://github.com/kelvin-mai/clj-auth/blob/main/src/auth/db.clj
 ;; https://cljdoc.org/d/com.github.seancorfield/next.jdbc/1.3.847/doc/getting-started/tips-tricks#working-with-json-and-jsonb
 ;; https://cljdoc.org/d/com.github.seancorfield/next.jdbc/1.3.847/doc/getting-started?q=pool#connection-pooling
-
+;; could benefit from triggers to updating last_modified
 (defonce ephemeral-db (atom {}))
 
 (def db-lite {:dbtype "sqlite" :dbname (if (get config :dev)

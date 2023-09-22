@@ -1,7 +1,7 @@
 (ns khsalim.backend.routers
   (:require
-   [clojure.set :refer [map-invert]]
-   [khsalim.backend.customer :refer [render-form]]
+   ;;[clojure.set :refer [map-invert]]
+   ;;[khsalim.backend.customer :refer [render-form]]
    [khsalim.backend.utils :as ku :refer [config cookie-header-middleware wrap-jwt-authentication auth-middleware create-token]]
    [khsalim.backend.db :as db :refer [ephemeral-db]]
 
@@ -79,8 +79,6 @@
    (if dev
      (fn [_] (rur/response (selmer/render-file (io/resource (str "pages/" file-name))  context-map)))
      (fn [_] (rur/file-response (str "public/" file-name))))))
-
-
 
 (defn recipe [{ds :ds
                {:keys [recipe-id]} :path-params}]
@@ -229,7 +227,10 @@
                                    :middleware [[echo-middleware "post recipe"]]}
                             :delete {:handler delete-recipe
                                      :middleware [[echo-middleware "delete recipe"]]}}]
-     ["/statistic" {:post register-recipe-finished}] ;; recipe.cljs
+     ["/statistic" {:muuntaja m/instance
+                    :middleware [datasource-middleware
+                                 format-middleware]
+                    :post register-recipe-finished}] ;; recipe.cljs
      ["/getUrl" {                       ;:name ::order
                                         ;:middleware [wrap-jwt-authentication auth-middleware]
                  :muuntaja m/instance

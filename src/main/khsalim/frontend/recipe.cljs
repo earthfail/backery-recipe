@@ -36,8 +36,10 @@
       (swap! counter inc)
       (if (= @counter (dec (count carouselImages)))
         (do (swap! pages dissoc current-page)
-            (go (<! (http/post "/api/v1/statistic" {:edn-params {:recipe-id current-page
-                                                                 :status :finished}}))))
+            (when-not @finished
+              (go (<! (http/post "/api/v1/statistic" {:edn-params {:recipe-id current-page
+                                                                   :status :finished}})))
+              (reset! finished true)))
         (swap! pages update current-page (fnil inc 0)))
       (js/localStorage.setItem "pages" (prn-str @pages)))
     (when VERBOSE

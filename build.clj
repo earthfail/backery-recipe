@@ -5,6 +5,7 @@
    [selmer.parser :as selmer]
    ;; [selmer.util :as sl]
    [clojure.edn :as edn]
+   [aero.core :refer [read-config]]
    [clojure.java.io :as io]))
 
 (def build-folder "target")
@@ -44,6 +45,7 @@
   "Given a `context-map` for `selmer.parser/render-file`,takes html files in resources/pages
   and output them to public folder"
   [context-map]
+  (pr context-map)
   ;; (println "selmer custom path is " sl/*custom-resource-path*)
   (doseq [html-file (.list (io/file (io/resource "pages")))]
     (println "compile " html-file)
@@ -62,7 +64,7 @@
   (println "minify css...")
   (compile-css nil)
   )
-(defn uber [{:keys [css html template cljs clean?], :or {css false html false template false cljs false clean? true}}]
+(defn uber [{:keys [css html template cljs clean? clj?], :or {css false html false template false cljs false clean? true clj? true}}]
   (clean nil)
   ; (println "compile cljs to js...")
   ; (compile-cljs nil)
@@ -77,15 +79,17 @@
     (compile-cljs nil))
 
   (when template
-    (compile-html {}))
+    (let [config (read-config (io/resource "config.edn"))]
+      (println "config " config)
+      (compile-html {:client-id (get-in config [:github :client-id])
+                     :redirect-uri (get-in config [:github :redirect-uri])})))
   (when html
-    (do
-      (minify-html nil)
-      (b/copy-dir {:src-dirs ["minified/templates"]
-                   :target-dir "tmp/resources/templates"})
-      (b/copy-dir {:src-dirs ["minified/pages"]
-                   :target-dir "public"})))
-  
+    (minify-html nil)
+    (b/copy-dir {:src-dirs ["minified/templates"]
+                 :target-dir "tmp/resources/templates"})
+    (b/copy-dir {:src-dirs ["minified/pages"]
+                 :target-dir "public"}))
+
   (b/copy-dir {:src-dirs ["tmp/resources"]
                :target-dir jar-content})
 
@@ -94,15 +98,15 @@
     (b/delete {:path "tmp"})
     (b/delete {:path "minified"}))
 
-  (println "compile clj...")
-  (b/compile-clj {:basis basis
-                  :src-dirs ["src"]
-                  :class-dir jar-content})
-  (b/uber {:class-dir jar-content
-           :uber-file uber-file-name
-           :basis basis
+  (when clj?
+    (println "compile clj...")
+    (b/compile-clj {:basis basis
+                    :src-dirs ["src"]
+                    :class-dir jar-content})
+    (b/uber {:class-dir jar-content
+             :uber-file uber-file-name
+             :basis basis
            ;; :main 'khsalim.backend.server
-           :main 'khsalim.backend.core
-           })
-  (println (format "Uber file created \"%s\"" uber-file-name)))
+             :main 'khsalim.backend.core})
+    (println (format "Uber file created \"%s\"" uber-file-name))))
 
