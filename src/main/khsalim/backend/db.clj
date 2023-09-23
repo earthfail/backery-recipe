@@ -68,11 +68,11 @@
   (try
     (jdbc/execute! ds [(str "INSERT INTO \"users-recipes\" "
                             "(\"user-id\",\"recipe-id\",description,name,last_modified)"
-                            "VALUES(?,?,?,?,datetime()"
+                            "VALUES(?,?,?,?,datetime())"
                             "ON CONFLICT DO "
                             "UPDATE SET description=excluded.description,name=excluded.name")
-                       recipe-name recipe-description
-                       user-id recipe-id])
+                       user-id recipe-id
+                       recipe-name recipe-description])
     (catch Exception e (log-message "register-recipe-data" (.getMessage e)))))
 (defn register-recipe-statistic [ds recipe-id]
   (try
@@ -104,13 +104,15 @@
   (jdbc/execute! ds ["select * from \"recipes-steps\""])
   (jdbc/execute! ds ["select * from \"logs\""])
 
-  (create-authenticated-user ds ["name" "email" "githubdub" "refresh-token" "avatar-url"])
-  (create-authenticated-user ds ["salim4" "surrlim@gmail.com" "github" "adfa_vvvv"])
+  ;; (create-authenticated-user ds ["name" "email" "githubdub" "refresh-token" "avatar-url"])
+  ;; (create-authenticated-user ds ["salim4" "surrlim@gmail.com" "github" "adfa_vvvv"])
 
-  (insert-refresh-token ds ["abc" 37])
+  ;; (insert-refresh-token ds ["abc" 37])
 
-  (delete-recipe ds "1" "21438")
+  ;; (delete-recipe ds "1" "21438")
 
+  (register-recipe-data ds 1 1234 "piza" "peporoni")
+  
   (->
    (jdbc/execute! ds ["select * from \"logs\""])
    first

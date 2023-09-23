@@ -222,11 +222,14 @@
                             ;;  #_[echo-middleware "order"]]
                             ;; :get customer-form
                             :patch {:handler register-recipe
-                                    :middleware [[echo-middleware "patch recipe"]]}
+                                    :middleware [(when dev
+                                                   [echo-middleware "patch recipe"])]}
                             :post {:handler upload-recipe
-                                   :middleware [[echo-middleware "post recipe"]]}
+                                   :middleware [(when dev
+                                                  [echo-middleware "post recipe"])]}
                             :delete {:handler delete-recipe
-                                     :middleware [[echo-middleware "delete recipe"]]}}]
+                                     :middleware [(when dev
+                                                    [echo-middleware "delete recipe"])]}}]
      ["/statistic" {:muuntaja m/instance
                     :middleware [datasource-middleware
                                  format-middleware]
@@ -249,7 +252,8 @@
                             wrap-cookies
                             format-middleware
                             parameters-middleware
-                            [echo-middleware "signup endpoint!"]]
+                            (when dev
+                              [echo-middleware "signup endpoint!"])]
                :get sign-up}]])
 
 (defn router-gen []
@@ -263,7 +267,8 @@
                          :middleware [parameters-middleware
                                       format-middleware
                                       exception-middleware
-                                      [echo-middleware "adding user!"]]}}]
+                                      (when dev
+                                        [echo-middleware "adding user!"])]}}]
 
     ["/login" {:get echo
                :post {:handler echo #_confirm-user
@@ -275,7 +280,8 @@
                    :middleware [datasource-middleware
                                 wrap-cookies
                                 [cookie-header-middleware jwt-cookie-name]
-                                [echo-middleware "daaaashboarrrrrd!"]]}]
+                                (when dev
+                                  [echo-middleware "daaaashboarrrrrd!"])]}]
     ["/recipes/cook/:recipe-id" {:name ::recipe
                                  :middleware [datasource-middleware]
                                  :get recipe}]
@@ -297,16 +303,16 @@
               ;; :muuntaja m/instance
 
                 :middleware [;cors-middleware
-                             [wrap-cors
-                              :access-control-allow-credentials true
-                              :access-control-allow-origin #"http://localhost:3000"
-                              :access-control-allow-methods [:get]
-                              :access-control-expose-headers "Etag"]
+                             ;; [wrap-cors
+                             ;;  :access-control-allow-credentials true
+                             ;;  :access-control-allow-origin #"http://localhost:3000"
+                             ;;  :access-control-allow-methods [:get]
+                             ;;  :access-control-expose-headers "Etag"]
                              [echo-middleware "echoing"]]
                 :get echo
                 :post echo}])
     (api-routes)]
-   #_{:reitit.middleware/transform reitit.ring.middleware.dev/print-request-diffs}
+   {:reitit.middleware/transform reitit.ring.middleware.dev/print-request-diffs}
    #_{:data {:muuntaja m/instance
              :middleware [parameters-middleware
                           format-middleware
