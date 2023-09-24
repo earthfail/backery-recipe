@@ -23,36 +23,32 @@
     [type="checkbox"]{
 	@apply text-oil;
     }
+    .clipboard-btn::before{
+	transition:
+	    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+	    opacity 0.6s ease-in;
+    }
+    .clipboard-btn:focus::before{
+	transform:translate(-50%,-50%);
+	opacity:1;
+    }
+    .clipboard-btn::before{
+	@apply rounded-md;
+	content:'نسخت';
+	background: var(--text);
+	color:var(--background);
+	position:absolute;
+	z-index:10;
+	bottom: 50%;
+	left: 50%;
+	transform:translate(-50%,0%);
+	opacity: 0;
+	padding: 0.2em 0.5em 0 0.5em;
+    }
 }
-
-
 [type="checkbox"]:focus{
     box-shadow: none;
 }
-
-.brown{
-    --text: #0b1c28;
-    --background: #ebf3fa;
-    --primary-button: #643a1b;
-    --secondary-button: #f7fafd;
-    --accent: #140c05;
-}
-
-.yellow{
-    --text: #090802;
-    --background: #f9f6e1;
-    --primary-button: #efe4a9;
-    --secondary-button: #f4ecc3;
-    --accent: #f3ebbf;
-}
-.green{
-    --text: #020401;
-    --background: #f9fdf7;
-    --primary-button: #7ecc5c;
-    --secondary-button: #ffffff;
-    --accent: #8dd270;
-}
-
 .red-brown{
     --text: #260214;
     --background: #fffafc;
@@ -62,11 +58,4 @@
     --grass: #16ac16;
     --dirt: #E3AE7A;
     --summer-cloud: #FAFEFF;
-}
-.green-black{
-    --text: #260214;
-    --background: #fffafc;
-    --primary-button: #b9d7b2;
-    --secondary-button: #fdf2e7;
-    --accent: #6fb385;
 }

@@ -159,18 +159,22 @@
 (defn register-recipe-finished [{ds :ds
                                  {:keys [recipe-id status]} :body-params}]
   (if (not= :finished status)
-    (rur/bad-request (str "not finished" recipe-id " got " status))
+    (rur/bad-request {:status :failure
+                      :message (str "not finished" recipe-id " got " status)})
     (if (db/register-recipe-statistic ds recipe-id)
-      (rur/response "added statistic")
+      (rur/response {:status :success
+                     :message "added statistic"})
       (rur/status (rur/response "sorry didn't succeed") 502))))
 (defn register-recipe [{ds :ds
                         {:keys [id]} :identity
                         {:keys [recipe-id]} :path-params
                         {:keys [recipe-name recipe-description]} :body-params}]
-  (db/register-recipe-data ds id recipe-id recipe-name recipe-description)
-  (rur/response (str "added recipe data " id recipe-id recipe-name recipe-description)))
+  (if (db/register-recipe-data ds id recipe-id recipe-name recipe-description)
+    (rur/response {:status :success
+                   :recipe-id recipe-id})
+    (rur/bad-request {:status :failure
+                      :recipe-id recipe-id})))
 (defn upload-recipe [{ds :ds
-                      {:keys [id]} :identity
                       {:keys [recipe-id]} :path-params,
                       {:keys [step description url media-type]} :body-params}]
   ;; (println "req recipe" req)
@@ -178,11 +182,13 @@
 
   (rur/response [recipe-id " test " step description url media-type]))
 (defn delete-recipe [{ds :ds
-                     {:keys [id]} :identity
-                     {:keys [recipe-id]} :path-params}]
+                      {:keys [id]} :identity
+                      {:keys [recipe-id]} :path-params}]
   (if (< 0 (get (first (db/delete-recipe ds id recipe-id)) :next.jdbc/update-count))
-    (rur/response "deleted!!")
-    (rur/status (rur/response "resource gone") 405)))
+    (rur/response {:status :deleted
+                   :message "deleted!!"})
+    (rur/status (rur/response {:status :failure
+                               :message "failure"}) 405)))
 
 (defn echo [_]
   #_(rur/response

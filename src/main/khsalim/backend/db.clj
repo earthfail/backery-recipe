@@ -55,8 +55,9 @@
 (defn delete-recipe [ds user-id recipe-id]
   (try
     (jdbc/with-transaction [tx ds]
-      (jdbc/execute! tx ["DELETE FROM \"users-recipes\" WHERE \"user-id\" = ? AND \"recipe-id\" = ? ;" user-id recipe-id])
-      (jdbc/execute! tx ["DELETE FROM \"recipes-steps\" WHERE \"recipe-id\" = ? ;" recipe-id]))
+      (let [recipes (jdbc/execute! tx ["DELETE FROM \"users-recipes\" WHERE \"user-id\" = ? AND \"recipe-id\" = ? ;" user-id recipe-id])]
+        (jdbc/execute! tx ["DELETE FROM \"recipes-steps\" WHERE \"recipe-id\" = ? ;" recipe-id])
+        recipes))
     (catch Exception e (log-message "delete-recipe" (.getMessage e)))))
 (defn insert-user-recipe [ds user-id recipe-id]
   (try
@@ -104,6 +105,7 @@
   (jdbc/execute! ds ["select * from \"recipes-steps\""])
   (jdbc/execute! ds ["select * from \"logs\""])
 
+  (jdbc/execute! ds ["DELETE FROM \"users-recipes\" WHERE \"user-id\" = ?;" 2])
   ;; (create-authenticated-user ds ["name" "email" "githubdub" "refresh-token" "avatar-url"])
   ;; (create-authenticated-user ds ["salim4" "surrlim@gmail.com" "github" "adfa_vvvv"])
 
@@ -112,14 +114,14 @@
   ;; (delete-recipe ds "1" "21438")
 
   (register-recipe-data ds 1 1234 "piza" "peporoni")
-  
+
   (->
    (jdbc/execute! ds ["select * from \"logs\""])
    first
    :logs/time_stamp)
-  
+
   (java.util.Date/parse "2023/08/28 16:51")
-  
+
   (jdbc/execute! ds ["SELECT * from users where id= :id" {"id" 1}])
 
   :rfc)

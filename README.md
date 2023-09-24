@@ -73,6 +73,15 @@ a great answer on [stackoverflow](https://stackoverflow.com/questions/4744751/ho
 
 window object can be omitted since it is global.
 
+## save to clipboard in javascript
+from the runes of [w3school](https://www.w3schools.com/howto/howto_js_copy_clipboard.asp) we can see the navigator object is used to save to clipboard. here is an example:
+
+``` javascript
+let text="text I want to be clipped";
+navigator.clipboard.writeText(text);
+console.log("text in clipboard!!");
+```
+
 ## if statement in selmer templating library
 I thought of using a data attribute to indicate if an image should appear or not in recipe.html but decided to go with another route instead.
 Because It bugged me how testing equality is in the library I thought it would be helpful to document it for future:

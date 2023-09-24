@@ -2,14 +2,15 @@
 {;; :source-paths ["src/main" "src/test"]
  ;; :dependencies []
  :deps {:aliases [:cljs]}
- :builds {:register {:target :browser
-                     :output-dir "public/js"
-                     :asset-path "/js"
-                     :devtools {:watch-dir "public"
-                                :before-load khsalim.frontend.register/stop
-                                :after-load khsalim.frontend.register/start
+ :builds {:dashboard {:target :browser
+                      :output-dir "public/js"
+                      :asset-path "/assets/js"
+                      :devtools {:watch-dir "public"
+                                :before-load khsalim.frontend.dashboard/stop
+                                :after-load khsalim.frontend.dashboard/start
                                 :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}
-                     :modules {:register {:init-fn khsalim.frontend.register/init}}}
+                      :modules {:dashboard {:init-fn khsalim.frontend.dashboard/init}}
+                      :dev {:closure-defines {khsalim.frontend.dashboard/VERBOSE true}}}
           :recipe {:target :browser
                    :output-dir "public/js"
                    :asset-path "/assets/js"

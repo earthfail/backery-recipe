@@ -1,26 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sign up</title>
+    <title>اذقنا اطيبً الاكلاتٍ</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="/assets/css/make.css" type="text/css" media="screen" />
 </head>
-<body>
-    <a href="/dashboard">dashboard</a>
-    <div id="app"></div>
+<body class="flex flex-col sm:w-full md:w-1/2 md:mx-auto min-h-screen relative">
+	<header class="flex flex-row justify-between px-4 py-2 bg-secondery">
+	<a href="/" alt="صفحة الرئيسية"><span class="font-amiri text-lg">أطباق سُهيل</span></a>
+
+	    <a href="/dashboard" alt="وصفات">
+		<div class="block rounded-full sm:mx-0 sm:shrink-0">
+		    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chef-hat"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" x2="18" y1="17" y2="17"/></svg>
+		</div>
+	    </a>
+	</header>
+	<main id="app" class="grow flex-col">
+	</main>
+	<footer class="flex flex-row justify-center w-full py-4 bg-accent2 text-white font-amiri font-semibold leading-3">
+	    سليم خطيب
+	</footer>
     <svg>
 	<symbol id="plus" viewBox="0 0 24 24">
 	    <line x1="12" x2="12" y1="5" y2="19"/>
 	    <line x1="5" x2="19" y1="12" y2="12"/>
 	</symbol>
     </svg>
-    <script id="data" type="application/json">
-     {{recipe-id|json|safe}}
-    </script>
-    
+    <script id="data" type="application/javascript">
+	    {{recipe-id|json|safe}}
+	</script>
     <script src="/assets/js/make.js"></script>
-</body>
+    </body>
 </html>
