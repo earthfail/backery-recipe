@@ -46,6 +46,11 @@
                     :me/url "https://github.com/funcool/buddy-auth"}
   buddy/buddy-hashers {:mvn/version "1.8.158"
                        :me/url "https://github.com/funcool/buddy-hashers"}
+  buddy/buddy-sign {:mvn/version "3.5.351"
+                    :me/url "https://github.com/funcool/buddy-sign"}
+  clojure.java-time/clojure.java-time {:mvn/version "1.3.0"
+                                       :me/url "https://github.com/dm3/clojure.java-time"
+                                       :me/about "date and time functions"}
   selmer/selmer {:mvn/version "1.12.55"
                  :me/url "https://github.com/yogthos/Selmer"
                  :me/about "html template library"}
@@ -86,7 +91,7 @@
                            ring/ring-mock {:mvn/version "0.4.0"}}}
 
   :rebel
-  {:extra-deps {nrepl/nrepl                {:mvn/version "1.0.0"}
+  {:extra-deps {nrepl/nrepl                {:mvn/version "1.1.0"}
                 cider/cider-nrepl          {:mvn/version "0.31.0"}
                 com.bhauman/rebel-readline {:mvn/version "0.1.4"}}
    :main-opts  ["-e" "(apply require clojure.main/repl-requires)"
@@ -94,6 +99,12 @@
                 "--middleware" "[cider.nrepl/cider-middleware]"
                 "--interactive"
                 "-f" "rebel-readline.main/-main"]}
+  :nREPL
+  {:extra-deps
+   ;; UNIX domain socket support was added in 1.0.0
+   {nrepl/nrepl {:mvn/version "1.1.0"
+                 :me/help "clj -M:nREPL -m nrepl.cmdline --socket nrepl-test/socket"}
+    com.kohlschutter.junixsocket/junixsocket-core {:mvn/version "2.3.2"}}}
   :test/httpkit {:extra-deps {http-kit/http-kit {:mvn/version "2.6.0"
                                                  :me/about "html server"
                                                  :me/url "https://github.com/http-kit/http-kit"}}}
@@ -107,8 +118,8 @@
   :cider-cljs {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.339"}
                             cider/cider-nrepl {:mvn/version "0.31.0"}
                             cider/piggieback {:mvn/version "0.5.3"}}
-               :main-opts ["-m" "nrepl.cmdline" "--middleware"
-                           "[cider.nrepl/cider-middleware,cider.piggieback/wrap-cljs-repl]"]}
+               :main-opts ["-m" "nrepl.cmdline"
+                           "--middleware" "[cider.nrepl/cider-middleware,cider.piggieback/wrap-cljs-repl]"]}
   :cljs {:extra-deps {thheller/shadow-cljs {:mvn/version "2.20.20"}
                       lilactown/helix {:mvn/version "0.1.10"
                                        reagent/reagent {:mvn/version "1.2.0"}}

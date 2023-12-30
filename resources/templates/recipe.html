@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{{name}}-recipe</title>
+	<title>وصفه</title>
 	<link rel="icon" href="data:,">
 	<link rel="stylesheet" href="/assets/css/recipe.css" type="text/css" media="screen" />
 	<style>
@@ -20,11 +20,19 @@
     <body class="flex flex-col sm:w-full md:w-1/2 md:mx-auto min-h-screen relative">
 	<header class="flex flex-row justify-between px-4 py-2 bg-secondery">
 	    <a href="/" alt="الصفحة الرئيسية"><span class="font-amiri text-lg">أطباق سُهيل</span></a>
+	    {% if user? %}
+	    <a href="/dashboard" alt="لوحة التحكم">
+		<div class="block rounded-full sm:mx-0 sm:shrink-0">
+		    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chef-hat"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" x2="18" y1="17" y2="17"/></svg>
+		</div>
+	    </a>
+	    {% else %}
 	    <a href="/" alt="الصفحة الرئيسية">
 		<div class="block rounded-full sm:mx-0 sm:shrink-0">
 		    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chef-hat"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" x2="18" y1="17" y2="17"/></svg>
 		</div>
 	    </a>
+	    {% endif %}
 	</header>
 	<main id="app" class="grow flex">
 	    <div class="carousel-container w-full basis-full relative overflow-hidden">
@@ -63,8 +71,6 @@
 		    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
 		</button>
 	    </div>
-
-
 	</main>
 	<footer class="flex flex-row justify-center w-full py-4 bg-accent2 text-white font-amiri font-semibold leading-3">
 	    سليم خطيب
@@ -73,5 +79,23 @@
 	    {{recipe-id|json|safe}}
 	</script>
 	<script type="text/javascript" src="/assets/js/recipe.js" async-attr defer-attr></script>
+	<script type="text/javascript">
+	 let refresh_token=localStorage.getItem("refreshToken");
+	 if(refresh_token!==null){
+	     function refreshToken(){
+		 if(refresh_token!==null){
+		     fetch("/token", {"method": "POST", "headers": {"content-type": "application/json"}, "body": JSON.stringify({"refresh-token": localStorage.getItem("refreshToken")}) }).then(a=>a.json()).then((v)=>{
+			 if(v.status=="success"){
+			     localStorage.setItem("refreshToken",v["refresh-token"]);
+			     setTimeout(refreshToken,25000);
+			 }else{
+			     console.log(v["status"]);
+			 }
+		     });
+		 }
+	     }
+	 }
+	 refreshToken();
+	</script>
     </body>
 </html>

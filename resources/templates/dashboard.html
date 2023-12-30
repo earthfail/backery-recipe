@@ -21,11 +21,13 @@
 	<header class="flex flex-row justify-between px-4 py-2 bg-secondery">
 	    <span class="font-amiri text-lg">أطباق سُهيل</span>
 	    <div class="block rounded-full sm:mx-0 sm:shrink-0">
-		{% if avatar-url|empty? %}
-		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-		{% else %}
-		<img width="24" height="24" src="{{avatar-url}}"/>
-		{% endif %}
+		<a href="/settings">
+		    {% if avatar-url|empty? %}
+		    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+		    {% else %}
+		    <img width="24" height="24" src="{{avatar-url}}"/>
+		    {% endif %}
+		</a>
 	    </div>
 	</header>
 	<div class="grow space-y-2 my-2 shadow-md rounded-xl px-2 py-2">
@@ -122,11 +124,23 @@
 	</svg>
 	<script id="data" type="application/json">
 	 {{recipes|json|safe}}
-	</script>
-	
+	</script>	
 	<script type="text/javascript" src="/assets/js/dashboard.js"></script>
 	<script>
-	 
+	 let refresh_token=localStorage.getItem("refreshToken");
+	 function refreshToken(){
+	     if(refresh_token!==null){
+		 fetch("/token", {"method": "POST", "headers": {"content-type": "application/json"}, "body": JSON.stringify({"refresh-token": localStorage.getItem("refreshToken")}) }).then(a=>a.json()).then((v)=>{
+		     if(v.status=="success"){
+			 localStorage.setItem("refreshToken",v["refresh-token"]);
+			 setTimeout(refreshToken,25000);
+		     }else{
+			 console.log(v["status"]);
+		     }
+		 });
+	     }
+	 }
+	 refreshToken();
 	</script>
     </body>
 </html>

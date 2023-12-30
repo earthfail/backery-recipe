@@ -1,95 +1,115 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>index</title>
-    <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="/assets/css/index.css" type="text/css" media="screen" />
-    <style>
-     .button{
-	 @apply w-full border-gray-300 rounded-lg shadow-sm focus:border-accent focus:ring-accent;
-     }
-     .footer{
-	 @apply sticky bottom-0;
-     }
-     /* class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 pl-5 border-2 border-black" */
-    </style>
-</head>
-<body class="flex flex-col sm:w-full md:w-1/2 md:mx-auto min-h-screen relative">
-    <header class="flex flex-row justify-between px-4 py-2 bg-secondery">
-	<span class="font-amiri text-lg">أطباق سُهيل</span>
-	    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-secondery text-black shadow hover:bg-primary/90 hover:text-white focus:bg-grass focus:text-white h-9 px-4 py-2 border-2 border-black" type="button" id="signin-btn" >حسابي</button>
-    </header>
-    <section class="bg-gradient-to-b from-secondery from-30% to-background h-1/4 px-4 pt-8 pb-4">
-	<picture>
-	    <img alt="" src="/resources/static/chef-hat.svg"/>
-	</picture>
-	<aside>
-	    <h1 class="font-amiri text-2xl">وصفات سهلة</h1>
-	    <p class="leading-loose">أفضل موقع لمشاركة الوصفات</p>
-	    <p class="leading-loose">شارك عملائك في لحظات</p>
-	</aside>
-	<button class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-secondery shadow hover:bg-primary/90 focus:bg-grass focus-visible:text-white focus-visible:ring-accent2 hover:ring-1 h-11  px-8 py-2">
-	    ابدا الان
-	</button>
-    </section>
-    <article class="grow">
-	<section class="h-screen">
-	    <div class="bg-oil px-4 py-4">
-		<h3 class="text-3xl">انشء حساب</h3>
-		<p class="max-w-[40ch]">يمكن بدأ مجانا وبدون ايميل</p>
-	    </div>
-	    <picture>
-		<div class="hover:animate-pulse aspect-phone md:aspect-desk md:my-8 md:mx-4 bg-gray-200">
-		    yooooo
-		</div>
-	    </picture>
-	    
-	</section>
-	<section class="h-screen">
-	    <div class="bg-oil px-4 py-4">
-		<h3 class="text-3xl">سجل وصفه</h3>
-		<p class="max-w-[40ch]">
-		    سجل خطوات التحضير. يمكن اضافة صورة وفيديو ومؤقت.
-		    سوف يقوم نظامنا بقراءة الخطوات للمستخدم
-		</p>
-	    </div>
-	    <picture>
-		<div class=" aspect-phone md:aspect-desk md:my-8 md:mx-4 bg-gray-200"w alt="" src="">
-		    yooooo
-		</div>
-		
-	    </picture>
-	</section>
-	<section class="h-screen">
-	    <div class="bg-oil px-4 py-4">
-		<h3 class="text-3xl">شارك معجبيك</h3>
-		<p class="max-w-[40ch]">
-		    يمكن مشاركة وصفتين بالحساب المجاني والاف الوصفات بالحساب التجاري
-		</p>
-	    </div>
-	    <picture>
-		<div class="aspect-phone md:aspect-desk md:my-8 md:mx-4 bg-gray-200" alt="" src="">
-		    yooooo
-		</div>
-	    </picture>
-	</section>
-    </article>
-    <footer class="flex flex-row justify-center w-full py-4 bg-accent2 text-white font-amiri font-semibold leading-3">
-	سليم خطيب
-    </footer>
-    <script type="text/javascript">
-     let redirectUri="https://github.com/login/oauth/authorize?client_id={{client-id}}&redirect_uri={{redirect-uri}}"
-     let signinBtn=document.getElementById("signin-btn");
-     signinBtn.addEventListener("click", (e)=>{
-	 if(localStorage.getItem("refreshToken")===null){
-	     window.location.href=redirectUri;
-	 }else{
-	     window.location="/dashboard";
+    <head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>index</title>
+	<link rel="icon" href="data:,">
+	<link rel="stylesheet" href="/assets/css/index.css" type="text/css" media="screen" />
+	<style>
+	 .button{
+	     @apply w-full border-gray-300 rounded-lg shadow-sm focus:border-accent focus:ring-accent;
 	 }
-     });
-    </script>
-</body>
+	 .footer{
+	     @apply sticky bottom-0;
+	 }
+	 /* class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 pl-5 border-2 border-black" */
+	</style>
+    </head>
+    <body class="flex flex-col sm:w-full md:w-1/2 md:mx-auto min-h-screen relative">
+	<header class="flex flex-row justify-between px-4 py-2 bg-secondery">
+	    <span class="font-amiri text-lg">أطباق سُهيل</span>
+	    <button type="button" id="signin-btn"
+		    class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-secondery text-black shadow hover:bg-primary/90 hover:text-white focus:bg-grass focus:text-white h-9 px-4 py-2 border-2 border-black" >حسابي</button>
+	</header>
+	<section class="bg-gradient-to-b from-secondery from-30% to-background h-1/4 px-4 pt-8 pb-4">
+	    <picture>
+		<img alt="" src="/assets/img/chef-hat.svg"/>
+	    </picture>
+	    <aside>
+		<h1 class="font-amiri text-2xl">وصفات سهلة</h1>
+		<p class="leading-loose">أفضل موقع لمشاركة الوصفات</p>
+		<p class="leading-loose">شارك عملائك في لحظات</p>
+	    </aside>
+	    <a href="/register"
+	       type="button" id="signup-btn"
+	       class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-secondery shadow hover:bg-primary/90 focus:bg-grass focus-visible:text-white focus-visible:ring-accent2 hover:ring-1 h-11	px-8 py-2">
+		ابدا الان
+	    </a>
+	</section>
+	<article class="grow">
+	    <section class="h-screen">
+		<div class="bg-oil px-4 py-4">
+		    <h3 class="text-3xl">انشء حساب</h3>
+		    <p class="max-w-[40ch]">يمكن بدأ مجانا وبدون ايميل</p>
+		</div>
+		<picture>
+		    <div class="aspect-phone md:aspect-desk md:my-8 md:mx-4 bg-gray-200">
+			yooooo
+		    </div>
+		</picture>
+		
+	    </section>
+	    <section class="h-screen">
+		<div class="bg-oil px-4 py-4">
+		    <h3 class="text-3xl">سجل وصفه</h3>
+		    <p class="max-w-[40ch]">
+			سجل خطوات التحضير. يمكن اضافة صورة وفيديو ومؤقت.
+			سوف يقوم نظامنا بقراءة الخطوات للمستخدم
+		    </p>
+		</div>
+		<picture>
+		    <div class=" aspect-phone md:aspect-desk md:my-8 md:mx-4 bg-gray-200"w alt="" src="">
+			yooooo
+		    </div>
+		</picture>
+	    </section>
+	    <section class="h-screen">
+		<div class="bg-oil px-4 py-4">
+		    <h3 class="text-3xl">شارك معجبيك</h3>
+		    <p class="max-w-[40ch]">
+			يمكن مشاركة وصفتين بالحساب المجاني والاف الوصفات بالحساب التجاري
+		    </p>
+		</div>
+		<picture>
+		    <div class="aspect-phone md:aspect-desk md:my-8 md:mx-4 bg-gray-200" alt="" src="">
+			yooooo
+		    </div>
+		</picture>
+	    </section>
+	</article>
+	<footer class="flex flex-row justify-center w-full py-4 bg-accent2 text-white font-amiri font-semibold leading-3">
+	    <span>سليم خطيب</span>
+	    <a href="https://lucide.dev/license">lucide icons</a>
+	</footer>
+	<script type="text/javascript">
+	 let redirectUri="https://github.com/login/oauth/authorize?client_id={{client-id}}&redirect_uri={{redirect-uri}}";
+	 let signinBtn=document.getElementById("signin-btn");
+	 signinBtn.addEventListener("click", (e)=>{
+	     if(document.cookie.includes("{{jwt-cookie-name}}")){
+		 window.location="/dashboard";
+	     }else{
+		 window.location.href=redirectUri;
+	 }});
+	 let refresh_token=localStorage.getItem("refreshToken");
+	 try{	     
+	     function refreshToken(){
+		 if(refresh_token!==null){
+		     fetch("/token", {"method": "POST", "headers": {"content-type": "application/json"}, "body": JSON.stringify({"refresh-token": localStorage.getItem("refreshToken")}) }).then(a=>a.json()).then((v)=>{
+			 if(v.status=="success"){
+			     localStorage.setItem("refreshToken",v["refresh-token"]);
+			     setTimeout(refreshToken,25000);
+			 }else{
+			     console.log(v["status"]);
+			 }
+		     });
+		 }
+		 refreshToken();
+	     }
+	 }catch(e){
+	     console.log("error",e);
+	 }
+	</script>
+    </body>
 </html>
