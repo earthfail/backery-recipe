@@ -4,6 +4,8 @@
    [buddy.auth.backends :refer [jws]]
    [buddy.auth.middleware :refer [wrap-authentication]]
    [buddy.sign.jwt :as jwt]
+   [buddy.sign.util]
+   [java-time.api :as jt]
    [clj-http.client :as client]
    [cheshire.core :as json]
    [aero.core :refer [read-config]]
@@ -21,17 +23,16 @@
                            "public"))
 (def jwt-secret (get-in config [:jwt-secret 0]))
 (def jwt-refresh-secret (get-in config [:jwt-refresh-secret 0]))
-;; {:secret jwt-secret :on-error println}
-(def buddy-backend (jws {:secret @#'jwt-secret}))
 
-(when (get config :dev)
-      (require '[clojure.java.javadoc :as jdoc]
-               '[clojure.reflect :as reflect]
-               '[clojure.inspector :as insp]
-               '[clojure.pprint :as pp]
-               '[clojure.repl :as repl])
-      #_(jdoc/add-remote-javadoc "org.eclipse.jetty.server" "https://www.eclipse.org/jetty/javadoc/jetty-9/")
-      :required)
+
+(extend-protocol buddy.sign.util/ITimestamp
+  ;;used to convert value of :exp in token validation. value should be seconds from the Epoch. see buddy.sign.util
+  ;; could be avoided by using java.util.Date object but I want to improve my skills with protocols.
+  java.time.Instant
+  (to-timestamp [obj]
+    (.getEpochSecond ^java.time.Instant obj)))
+;; could benefit from tap> instead of println :on-error
+(def buddy-backend (jws {:secret @#'jwt-secret :on-error (partial println "jwt error:")}))
 
 (defn wrap-jwt-authentication
   "check `authorization` header in http request for the expression \"Token [token]\""
@@ -48,25 +49,36 @@
                                      {:root static-files-root})
                   401))))
 (defn create-token [payload]
-  (jwt/sign payload @#'jwt-secret))
+  (jwt/sign payload @#'jwt-secret #_{:exp (jt/plus (jt/instant) (jt/seconds 30))
+                                   :iat (jt/instant)}))
 (defn create-refresh-token [payload]
+  (jwt/sign payload @#'jwt-refresh-secret #_{:exp (jt/plus (jt/instant) (jt/days 5))}))
+(defn create-authentication-token [payload]
   (jwt/sign payload @#'jwt-refresh-secret))
 (def create-tokens (juxt create-refresh-token create-token))
 
+(defn unsign-refresh-token [payload]
+  (try
+    (jwt/unsign payload @#'jwt-refresh-secret)
+    (catch clojure.lang.ExceptionInfo e
+      (println "jwt error message:" (.getMessage e)) nil)))
+(defn cookie-to-authorization-header [handler cookie-name]
+  (fn [request]
+    (handler (assoc-in request [:headers "authorization"]
+               (str "Token " (get-in request [:cookies cookie-name :value]))))))
 (defn cookie-header-middleware [handler cookie-name]
   (fn cookie-auth-handler [request]
-    ((-> handler
-         auth-middleware
-         wrap-jwt-authentication)
-     (assoc-in request [:headers "authorization"]
-               (str "Token " (get-in request [:cookies cookie-name :value]))))))
+      ((-> handler
+           auth-middleware
+           wrap-jwt-authentication)
+       (assoc-in request [:headers "authorization"]
+                 (str "Token " (get-in request [:cookies cookie-name :value]))))))
 (defn github-access-token [code]
   (let [result (client/post "https://github.com/login/oauth/access_token"
                             {:accept :json
                              :form-params {:client_id (get-in config [:github :client-id])
                                            :client_secret (get-in config [:github :client-secret])
                                            :code code}})]
-    (def res result)
     (->
      result
      (get :body "")
@@ -111,6 +123,9 @@
     (-> "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.vHq9-Yi6NjVoyRppY0SVAAq2FTNedm34-ZbLz7Jf92k"
         (jwt/unsign jwt-secret))
     (catch Exception e (str "caught exception: " (.getMessage e) (type e))))
-
+  #_(-> handler
+      auth-middleware
+      wrap-jwt-authentication
+      (cookie-to-authorization cookie-name))
   @#'jwt-secret
   :rfc)

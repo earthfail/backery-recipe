@@ -1,10 +1,11 @@
 (ns khsalim.backend.db
-  (:refer-clojure :exclude [derive])
-  (:require [buddy.hashers :refer [derive verify]]
-            [next.jdbc :as jdbc]
-            [next.jdbc.date-time]
-            [next.jdbc.result-set :as rs]
-            [khsalim.backend.utils :refer [config]]))
+  ;(:refer-clojure :exclude [derive])
+  (:require
+   ;[buddy.hashers :refer [derive verify]]
+   [next.jdbc :as jdbc]
+   [next.jdbc.date-time]
+   [next.jdbc.result-set :as rs]
+   [khsalim.backend.utils :as ku :refer [config]]))
 ;; https://github.com/kelvin-mai/clj-auth/blob/main/src/auth/db.clj
 ;; https://cljdoc.org/d/com.github.seancorfield/next.jdbc/1.3.847/doc/getting-started/tips-tricks#working-with-json-and-jsonb
 ;; https://cljdoc.org/d/com.github.seancorfield/next.jdbc/1.3.847/doc/getting-started?q=pool#connection-pooling
@@ -30,6 +31,12 @@
      ds
      (into ["UPDATE users SET refresh_token = ?, last_modified=datetime()  WHERE id=?;"] record))
     (catch Exception e (log-message "insert-refresh-token"(.getMessage e)))))
+(defn get-user-refresh-token [ds user-id]
+  (try
+    (get (jdbc/execute-one! ds ["SELECT id,refresh_token FROM users WHERE id=?" user-id])
+         :users/refresh_token)
+
+    (catch Exception e (log-message "get-user-refresh-token" (.getMessage e)))))
 (defn create-authenticated-user
   "second argument is of the form [name email authorization-server authorization-server-refresh-token avatar-url]"
   [ds [name email authorization-server authorization-server-refresh-token avatar-url :as user-record]]
@@ -46,6 +53,16 @@
                  "RETURNING id,name,email")]
            user-record))
     (catch Exception e (log-message "create-auth-user" (.getMessage e)))))
+(defn create-unauthenticated-user [ds name]
+  "insert unauthorized user to database"
+  (try
+    (jdbc/execute-one!
+     ds
+     [(str "INSERT INTO users (name,email,authorization_server,authorization_server_refresh_token,last_modified)"
+           "VALUES (?,?,\"khsalim\",?,datetime())"
+           "RETURNING id,name,email")
+      name (str name "@khsalim.com") (ku/create-authentication-token {:name name})])
+    (catch Exception e (log-message "create-unauth-user" (.getMessage e)))))
 (defn get-user-recipes [ds user-id]
   (try
     (jdbc/execute! ds ["SELECT \"recipe-id\",name,description FROM \"users-recipes\" WHERE \"user-id\"=?" user-id]

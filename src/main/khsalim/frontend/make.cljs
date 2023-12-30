@@ -67,7 +67,6 @@
                 :on-change (fn name-event [e]
                              (set-description (constantly (.. e -target -value))))}))
      (d/div
-      {:class ""}
       (d/label {:for "media-file"
                 :class "sr-only"} "حمل صورة")
       (d/input {:name "media" :id "media-file" :type "file"

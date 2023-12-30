@@ -6,11 +6,12 @@
    ;; [ring.adapter.jetty :as jetty]
    [clojure.java.io :as io]
    [ring.adapter.jetty9 :as jetty]
+   ;; [nrepl.server :refer [start-server stop-server]]
    ))
 (defonce server (atom nil))
 (defonce server-dev (atom nil))
-
-
+;; (defonce nrepl-server (delay (start-server :port 7888)))
+;; (defonce nrepl-server (delay (start-server :socket ".nrepl-socket")))
 
 (def service-map
   {:port 80
@@ -26,7 +27,8 @@
   {:port 3000
    :legacy-return-value? false
    :join? false
-   :host "0.0.0.0"})
+   ;:host "0.0.0.0"
+   })
 (defn start-dev []
   (reset! server-dev
           (jetty/run-jetty #'app dev-service-map))

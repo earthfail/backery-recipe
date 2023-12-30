@@ -10,7 +10,8 @@
                                 :after-load khsalim.frontend.dashboard/start
                                 :open-file-command ["emacsclient" "-n" ["+%s:%s" :line :column] :file]}
                       :modules {:dashboard {:init-fn khsalim.frontend.dashboard/init}}
-                      :dev {:closure-defines {khsalim.frontend.dashboard/VERBOSE true}}}
+                      :dev {:closure-defines {khsalim.frontend.dashboard/VERBOSE true
+                                              khsalim.frontend.dashboard/APP_URL #shadow/env ["APP_URL" "dwave.local"]}}}
           :recipe {:target :browser
                    :output-dir "public/js"
                    :asset-path "/assets/js"

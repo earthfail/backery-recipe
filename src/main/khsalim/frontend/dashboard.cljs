@@ -5,31 +5,34 @@
    [cljs.core.async :refer [<!]]
    [lambdaisland.dom-types]))
 (goog-define VERBOSE false)
+(goog-define APP_URL "localhost:3000")
+
 
 (def recipes (-> js/document
                  (.getElementById "data")
                  .-text
                  js/JSON.parse
                  (js->clj :keywordize-keys true)))
-(def base-link "localhost:3000")
+
 (def clipboards-btns (js/document.querySelectorAll ".clipboard-btn"))
 (def checkbox-btns (js/document.querySelectorAll ".checkbox-btn"))
 (def delete-btn (js/document.getElementById "delete-btn"))
 (def filter-box (js/document.getElementById "filter-name"))
 (defn recipe-link->clipboard [e]
-  (let [el (.-currentTarget e)
-        recipe-link (.-recipeLink ^DOMStringMap (.-dataset el))]
-    (js/navigator.clipboard.writeText (str base-link recipe-link))
-    (when VERBOSE (js/console.log "checked clipboard")
-          (js/console.log (.querySelector el "svg > use")))
-    (set! (.. (.querySelector el "svg > use") -href -baseVal)  "#checked-clipboard")
-    (js/setTimeout
-     #(do
-        (when VERBOSE (js/console.log "return to clipboard"))
-        (set! (.. (.querySelector el "svg > use") -href -baseVal)  "#clipboard")
-        (.blur el) ; remove focus
-        )
-     1300)))
+  (try 
+    (let [el (.-currentTarget e)
+          recipe-link (.-recipeLink ^DOMStringMap (.-dataset el))]
+      (js/navigator.clipboard.writeText (str APP_URL recipe-link))
+      (when VERBOSE (js/console.log "checked clipboard")
+            (js/console.log (.querySelector el "svg > use")))
+      (set! (.. (.querySelector el "svg > use") -href -baseVal)  "#checked-clipboard")
+      (js/setTimeout
+       #(do
+          (when VERBOSE (js/console.log "return to clipboard"))
+          (set! (.. (.querySelector el "svg > use") -href -baseVal)  "#clipboard")
+          (.blur el))
+       1300))
+    (catch :default e (js/console.log "couldn't copy" e))))
 (defn toggle-checkmark [e]
   (let [el (.-currentTarget e)
         state (.-state ^DOMStringMap (.-dataset el))
@@ -84,12 +87,26 @@
                     (js/document.getElementById "table-body")
                     selector)]
       (.. tr-ele -classList (remove "hidden")))))
+(defn loggin-event [_]
+  (js/console.log "recipes "recipes)
+  (js/console.log "link" APP_URL))
 (defn ^:dev/after-load start []
   (when VERBOSE
     (js/console.log "start")
     (js/console.dir recipes))
+  (when VERBOSE
+    (let [logging-el (doto (js/document.createElement "button")
+                       (set! -innerHTML "logging 3")
+                       (set! -id "logging-btn")
+                       (.addEventListener "click" loggin-event))
+          el-style (.-style logging-el)]
+      (doto el-style
+        (set! -position "fixed")
+        (set! -top "100px")
+        (set! -left "10px"))
+      (.appendChild js/document.body logging-el)))
   (doseq [clip clipboards-btns]
-      (.addEventListener clip "click" recipe-link->clipboard))
+    (.addEventListener clip "click" recipe-link->clipboard))
   (doseq [checkbox checkbox-btns]
     (.addEventListener checkbox "click" toggle-checkmark))
   (.addEventListener delete-btn "click" delete-recipes)
@@ -98,6 +115,10 @@
 (defn ^:dev/before-load stop []
   (when VERBOSE
     (js/console.log "stop"))
+  (when VERBOSE
+    (.removeEventListener (js/document.getElementById "logging-btn") "click" loggin-event)
+    (js/console.log "logbtn" (js/document.getElementById "logging-btn"))
+    (.remove (js/document.getElementById "logging-btn")))
   (doseq [clip clipboards-btns]
     (.removeEventListener clip "click" recipe-link->clipboard))
   (doseq [checkbox checkbox-btns]
@@ -107,11 +128,5 @@
 (defn init []
   (js/console.log "hiii init")
   (start))
-;; (when VERBOSE
-;;   (let [logging (doto (js/document.createElement "div")
-;;                   (set! -innerHTML "logging")
-;;                   (.addEventListener "click" #(do
-;;                                                 (js/console.log recipes))))]
-;;     (js/document.appendChild logging)))
 
 
